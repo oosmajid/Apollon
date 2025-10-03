@@ -1,0 +1,6 @@
+<!-- Simple anonymous user avatar (circle with person silhouette) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none">
+  <rect width="24" height="24" rx="4" fill="#F3F4F6" />
+  <path d="M12 12a3 3 0 100-6 3 3 0 000 6z" fill="#9CA3AF" />
+  <path d="M4 20a8 8 0 0116 0" fill="#E5E7EB" />
+</svg>

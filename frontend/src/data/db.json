@@ -1,0 +1,1858 @@
+{
+  "courses": [
+    {
+      "id": "c1",
+      "name": "فتوشاپ",
+      "chapters": [
+        { "id": "c1ch1", "name": "فصل اول: مقدمات", "duration": 3 },
+        { "id": "c1ch2", "name": "فصل دوم: ابزارها", "duration": 4 },
+        { "id": "c1ch3", "name": "فصل سوم: لایه‌ها", "duration": 5 },
+        { "id": "c1ch4", "name": "فصل چهارم: انتخاب", "duration": 3.5 },
+        { "id": "c1ch5", "name": "فصل پنجم: ماسک", "duration": 4.5 },
+        { "id": "c1ch6", "name": "فصل ششم: رنگ", "duration": 3 },
+        { "id": "c1ch7", "name": "فصل هفتم: متن", "duration": 2 },
+        { "id": "c1ch8", "name": "فصل هشتم: فیلترها", "duration": 2.5 },
+        { "id": "c1ch9", "name": "فصل نهم: ترکیب", "duration": 3 },
+        { "id": "c1ch10", "name": "فصل دهم: پروژه نهایی", "duration": 4 }
+      ],
+      "totalStudents": 6,
+      "graduates": 2,
+      "assignmentCount": 8,
+      "callCount": 11,
+      "assignmentsDef": [
+        { "id": "c1a1", "title": "اصول اولیه انتخاب و برش", "dueDate": "۱۴۰۴/۰۶/۱۵" },
+        { "id": "c1a2", "title": "کار با لایه‌ها و ماسک", "dueDate": "۱۴۰۴/۰۶/۲۵" },
+        { "id": "c1a3", "title": "ترکیب تصاویر", "dueDate": "۱۴۰۴/۰۷/۰۵" },
+        { "id": "c1a4", "title": "پروژه نهایی فتوشاپ", "dueDate": "۱۴۰۴/۰۷/۲۰" }
+      ],
+      "callsDef": [
+        { "id": "c1call1", "topic": "تماس اول (هفته ۱)" },
+        { "id": "c1call2", "topic": "تماس دوم (هفته ۲)" },
+        { "id": "c1call3", "topic": "تماس سوم (هفته ۴)" },
+        { "id": "c1call4", "topic": "تماس چهارم (هفته ۶)" },
+        { "id": "c1call5", "topic": "تماس پنجم (هفته ۸)" }
+      ]
+    },
+    {
+      "id": "c2",
+      "name": "پریمیر",
+      "chapters": [
+        { "id": "c1ch1", "name": "فصل اول: مقدمات", "duration": 3 },
+        { "id": "c1ch2", "name": "فصل دوم: ابزارها", "duration": 4 },
+        { "id": "c1ch3", "name": "فصل سوم: لایه‌ها", "duration": 5 },
+        { "id": "c1ch4", "name": "فصل چهارم: انتخاب", "duration": 3.5 },
+        { "id": "c1ch5", "name": "فصل پنجم: ماسک", "duration": 4.5 },
+        { "id": "c1ch6", "name": "فصل ششم: رنگ", "duration": 3 },
+        { "id": "c1ch7", "name": "فصل هفتم: متن", "duration": 2 },
+        { "id": "c1ch8", "name": "فصل هشتم: فیلترها", "duration": 2.5 },
+        { "id": "c1ch9", "name": "فصل نهم: ترکیب", "duration": 3 },
+        { "id": "c1ch10", "name": "فصل دهم: پروژه نهایی", "duration": 4 }
+      ],
+      "totalStudents": 5,
+      "graduates": 0,
+      "assignmentCount": 6,
+      "callCount": 8,
+      "assignmentsDef": [
+        { "id": "c2a1", "title": "تکلیف پریمیر ۱", "dueDate": "۱۴۰۴/۰۶/۱۵" },
+        { "id": "c2a2", "title": "تکلیف پریمیر ۲", "dueDate": "۱۴۰۴/۰۶/۲۵" }
+      ],
+      "callsDef": [
+        { "id": "c2call1", "topic": "تماس اول (هفته ۱)" },
+        { "id": "c2call2", "topic": "تماس دوم (هفته ۲)" },
+        { "id": "c2call3", "topic": "تماس سوم (هفته ۴)" },
+        { "id": "c2call4", "topic": "تماس چهارم (هفته ۶)" },
+        { "id": "c2call5", "topic": "تماس پنجم (هفته ۸)" }
+      ]
+    },
+    {
+      "id": "c3",
+      "name": "ایلاستریتور",
+      "chapters": [
+        { "id": "c1ch1", "name": "فصل اول: مقدمات", "duration": 3 },
+        { "id": "c1ch2", "name": "فصل دوم: ابزارها", "duration": 4 },
+        { "id": "c1ch3", "name": "فصل سوم: لایه‌ها", "duration": 5 },
+        { "id": "c1ch4", "name": "فصل چهارم: انتخاب", "duration": 3.5 },
+        { "id": "c1ch5", "name": "فصل پنجم: ماسک", "duration": 4.5 },
+        { "id": "c1ch6", "name": "فصل ششم: رنگ", "duration": 3 },
+        { "id": "c1ch7", "name": "فصل هفتم: متن", "duration": 2 },
+        { "id": "c1ch8", "name": "فصل هشتم: فیلترها", "duration": 2.5 },
+        { "id": "c1ch9", "name": "فصل نهم: ترکیب", "duration": 3 },
+        { "id": "c1ch10", "name": "فصل دهم: پروژه نهایی", "duration": 4 }
+      ],
+      "totalStudents": 4,
+      "graduates": 0,
+      "assignmentCount": 4,
+      "callCount": 0,
+      "assignmentsDef": [{ "id": "c3a1", "title": "تکلیف ایلاستریتور ۱", "dueDate": "۱۴۰۴/۰۶/۲۵" }],
+      "callsDef": [
+        { "id": "c3call1", "topic": "تماس اول (هفته ۱)" },
+        { "id": "c3call2", "topic": "تماس دوم (هفته ۲)" },
+        { "id": "c3call3", "topic": "تماس سوم (هفته ۴)" },
+        { "id": "c3call4", "topic": "تماس چهارم (هفته ۶)" },
+        { "id": "c3call5", "topic": "تماس پنجم (هفته ۸)" }
+      ]
+    },
+    {
+      "id": "c4",
+      "name": "افترافکت",
+      "chapters": [
+        { "id": "c1ch1", "name": "فصل اول: مقدمات", "duration": 3 },
+        { "id": "c1ch2", "name": "فصل دوم: ابزارها", "duration": 4 },
+        { "id": "c1ch3", "name": "فصل سوم: لایه‌ها", "duration": 5 },
+        { "id": "c1ch4", "name": "فصل چهارم: انتخاب", "duration": 3.5 },
+        { "id": "c1ch5", "name": "فصل پنجم: ماسک", "duration": 4.5 },
+        { "id": "c1ch6", "name": "فصل ششم: رنگ", "duration": 3 },
+        { "id": "c1ch7", "name": "فصل هفتم: متن", "duration": 2 },
+        { "id": "c1ch8", "name": "فصل هشتم: فیلترها", "duration": 2.5 },
+        { "id": "c1ch9", "name": "فصل نهم: ترکیب", "duration": 3 },
+        { "id": "c1ch10", "name": "فصل دهم: پروژه نهایی", "duration": 4 }
+      ],
+      "totalStudents": 4,
+      "graduates": 0,
+      "assignmentCount": 4,
+      "callCount": 11,
+      "assignmentsDef": [{ "id": "c4a1", "title": "تکلیف افترافکت ۱", "dueDate": "۱۴۰۴/۰۶/۱۵" }],
+      "callsDef": [
+        { "id": "c4call1", "topic": "تماس اول (هفته ۱)" },
+        { "id": "c4call2", "topic": "تماس دوم (هفته ۲)" },
+        { "id": "c4call3", "topic": "تماس سوم (هفته ۴)" },
+        { "id": "c4call4", "topic": "تماس چهارم (هفته ۶)" },
+        { "id": "c4call5", "topic": "تماس پنجم (هفته ۸)" }
+      ]
+    }
+  ],
+  "terms": [
+    {
+      "id": "t74",
+      "name": "ترم ۷۴",
+      "courseId": "c1",
+      "startDate": "۱۴۰۴/۰۶/۰۲",
+      "endDate": "۱۴۰۴/۰۸/۰۲"
+    },
+    {
+      "id": "t75",
+      "name": "ترم ۷۵",
+      "courseId": "c1",
+      "startDate": "۱۴۰۴/۰۸/۰۵",
+      "endDate": "۱۴۰۴/۱۰/۰۵"
+    },
+    {
+      "id": "t76",
+      "name": "ترم ۷۶",
+      "courseId": "c2",
+      "startDate": "۱۴۰۴/۰۷/۱۰",
+      "endDate": "۱۴۰۴/۰۹/۱۰"
+    },
+    {
+      "id": "t77",
+      "name": "ترم ۷۷",
+      "courseId": "c2",
+      "startDate": "۱۴۰۴/۰۹/۱۵",
+      "endDate": "۱۴۰۴/۱۱/۱۵"
+    },
+    {
+      "id": "t78",
+      "name": "ترم ۷۸",
+      "courseId": "c3",
+      "startDate": "۱۴۰۴/۱۰/۰۱",
+      "endDate": "۱۴۰۴/۱۲/۰۱"
+    },
+    {
+      "id": "t79",
+      "name": "ترم ۷۹",
+      "courseId": "c3",
+      "startDate": "۱۴۰۴/۱۲/۰۵",
+      "endDate": "۱۴۰۵/۰۲/۰۵"
+    },
+    {
+      "id": "t80",
+      "name": "ترم ۸۰",
+      "courseId": "c4",
+      "startDate": "۱۴۰۴/۱۱/۲۰",
+      "endDate": "۱۴۰۵/۰۱/۲۰"
+    },
+    {
+      "id": "t81",
+      "name": "ترم ۸۱",
+      "courseId": "c4",
+      "startDate": "۱۴۰۵/۰۱/۲۵",
+      "endDate": "۱۴۰۵/۰۳/۲۵"
+    },
+    {
+      "id": "t82",
+      "name": "ترم ۸۲",
+      "courseId": "c1",
+      "startDate": "۱۴۰۵/۰۲/۱۵",
+      "endDate": "۱۴۰۵/۰۴/۱۵"
+    },
+    {
+      "id": "t83",
+      "name": "ترم ۸۳",
+      "courseId": "c2",
+      "startDate": "۱۴۰۵/۰۳/۱۰",
+      "endDate": "۱۴۰۵/۰۵/۱۰"
+    }
+  ],
+  "apollonyars": [
+    {
+      "id": "ap1",
+      "name": "مریم احمدی",
+      "phone": "09121112233",
+      "status": "آزاد",
+      "telegramId": "@maryam_ahmadi"
+    },
+    {
+      "id": "ap2",
+      "name": "حسین کریمی",
+      "phone": "09122223344",
+      "status": "آزاد",
+      "telegramId": "@hossein_karimi"
+    },
+    {
+      "id": "ap3",
+      "name": "فاطمه محمدی",
+      "phone": "09124445566",
+      "status": "مسدود",
+      "telegramId": "@fatemeh_mohammadi"
+    },
+    {
+      "id": "ap4",
+      "name": "نگار جعفری",
+      "phone": "09125556677",
+      "status": "آزاد",
+      "telegramId": "@negar_jafari"
+    }
+  ],
+  "medals": [
+    {
+      "id": "m1",
+      "name": "سحرخیز",
+      "icon": "fa-solid fa-mug-saucer",
+      "description": "این مدال به هنرجویانی تعلق می‌گیرد که تکالیف خود را زودتر از موعد مقرر ارسال کنند."
+    },
+    {
+      "id": "m2",
+      "name": "چشم عقاب",
+      "icon": "fa-solid fa-eye",
+      "description": "این مدال به هنرجویانی داده می‌شود که در پروژه‌های خود دقت و ظرافت بالایی به خرج دهند."
+    },
+    {
+      "id": "m3",
+      "name": "همیار",
+      "icon": "fa-solid fa-hands-helping",
+      "description": "این مدال برای هنرجویانی است که به طور فعال به سایر اعضای گروه خود کمک می‌کنند."
+    },
+    {
+      "id": "m4",
+      "name": "سخت‌کوش",
+      "icon": "fa-solid fa-dumbbell",
+      "description": "این مدال به هنرجویانی تعلق می‌گیرد که تمام تکالیف دوره را با موفقیت به پایان برسانند."
+    },
+    {
+      "id": "m5",
+      "name": "خلاق",
+      "icon": "fa-solid fa-lightbulb",
+      "description": "این مدال برای هنرجویانی است که در تکالیف خود ایده‌های نو و خلاقانه ارائه دهند."
+    }
+  ],
+  "students": [
+    {
+      "id": 201,
+      "name": "رضا حسینی",
+      "phone": "09123456789",
+      "city": "تهران",
+      "birthYear": 1375,
+      "enrollments": [
+        {
+          "courseId": "c1",
+          "termId": "t74"
+        },
+        {
+          "courseId": "c2",
+          "termId": "t76"
+        }
+      ],
+      "apollonyarId": "ap1",
+      "totalCourseFee": 5000000,
+      "status": "آزاد",
+      "studentType": "ترمی",
+      "accessStatus": "فعال",
+      "enrollmentStatus": "در حین آموزش",
+      "earnedMedalIds": ["m1", "m3"],
+      "hearts": 2,
+      "score": 2.7,
+      "watchTime": 22.5,
+      "totalWatchTime": 30,
+      "chapterProgress": [
+        { "chapterId": "c1ch1", "progressPercent": 100 },
+        { "chapterId": "c1ch2", "progressPercent": 100 },
+        { "chapterId": "c1ch3", "progressPercent": 80 },
+        { "chapterId": "c1ch4", "progressPercent": 50 },
+        { "chapterId": "c1ch5", "progressPercent": 20 },
+        { "chapterId": "c1ch6", "progressPercent": 0 },
+        { "chapterId": "c1ch7", "progressPercent": 0 },
+        { "chapterId": "c1ch8", "progressPercent": 0 },
+        { "chapterId": "c1ch9", "progressPercent": 0 },
+        { "chapterId": "c1ch10", "progressPercent": 0 }
+      ],
+      "actionLogs": [
+        {
+          "id": "log1",
+          "action": "تغییر وضعیت به آزاد",
+          "dateTime": "۱۴۰۴/۰۶/۰۱ - ۱۱:۳۰",
+          "author": "علی رضایی",
+          "description": "وضعیت هنرجو از حالت 'مسدود' به 'آزاد' تغییر یافت تا بتواند دوره را ادامه دهد."
+        },
+        {
+          "id": "log2",
+          "action": "اعطای مدال سحرخیز",
+          "dateTime": "۱۴۰۴/۰۶/۱۰ - ۰۹:۰۰",
+          "author": "سیستم",
+          "description": "مدال به دلیل ارسال تکلیف اول، ۵ روز زودتر از موعد مقرر، توسط سیستم اعطا شد."
+        },
+        {
+          "id": "log3",
+          "action": "ثبت یادداشت",
+          "dateTime": "۱۴۰۴/۰۶/۱۲ - ۱۶:۲۰",
+          "author": "مریم احمدی",
+          "description": "یک یادداشت جدید توسط آپولون‌یار ثبت شد."
+        },
+        {
+          "id": "log4",
+          "action": "تماس تلفنی (موفق)",
+          "dateTime": "۱۴۰۴/۰۶/۱۹ - ۱۰:۱۵",
+          "author": "مریم احمدی",
+          "description": "تماس موفق با هنرجو برقرار شد و در مورد مشکلات تکلیف دوم صحبت شد."
+        },
+        {
+          "id": "log5",
+          "action": "تغییر دسترسی به فعال",
+          "dateTime": "۱۴۰۴/۰۷/۰۱ - ۱۴:۰۰",
+          "author": "سیستم",
+          "description": "دسترسی هنرجو به دوره به صورت خودکار فعال شد."
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "date": "۱۴۰۴/۰۶/۰۵",
+          "note": "در تماس تلفنی بسیار با انگیزه به نظر می‌رسید. مستعد دریافت مدال خلاقیت است.",
+          "author": "مریم احمدی"
+        },
+        {
+          "id": "n2",
+          "date": "۱۴۰۴/۰۶/۲۰",
+          "note": "نیاز به پیگیری برای تکلیف دوم دارد.",
+          "author": "مریم احمدی"
+        },
+        { "id": "n3", "date": "۱۴۰۴/۰۷/۰۱", "note": "برای استخدام مناسبه.", "author": "امین محمدی" }
+      ]
+    },
+    {
+      "id": 202,
+      "name": "سارا محمدی",
+      "phone": "09351112233",
+      "city": "مشهد",
+      "birthYear": 1379,
+      "enrollments": [
+        { "courseId": "c3", "termId": "t78" },
+        { "courseId": "c1", "termId": "t74" }
+      ],
+      "apollonyarId": "ap2",
+      "totalCourseFee": 5000000,
+      "status": "مسدود",
+      "studentType": "ترمی",
+      "accessStatus": "غیرفعال (بدهی)",
+      "enrollmentStatus": "در انتظار پروژه",
+      "earnedMedalIds": ["m2"],
+      "hearts": 3,
+      "score": 2.9,
+      "watchTime": 15.0,
+      "totalWatchTime": 40,
+      "chapterProgress": [
+        { "chapterId": "c1ch1", "progressPercent": 20 },
+        { "chapterId": "c1ch2", "progressPercent": 0 },
+        { "chapterId": "c1ch3", "progressPercent": 0 },
+        { "chapterId": "c1ch4", "progressPercent": 30 },
+        { "chapterId": "c1ch5", "progressPercent": 20 },
+        { "chapterId": "c1ch6", "progressPercent": 0 },
+        { "chapterId": "c1ch7", "progressPercent": 10 },
+        { "chapterId": "c1ch8", "progressPercent": 0 },
+        { "chapterId": "c1ch9", "progressPercent": 0 },
+        { "chapterId": "c1ch10", "progressPercent": 0 }
+      ],
+      "actionLogs": [
+        {
+          "id": "log6",
+          "action": "تغییر وضعیت به آزاد",
+          "dateTime": "۱۴۰۴/۰۶/۰۱ - ۱۱:۳۰",
+          "author": "علی رضایی",
+          "description": "توضیح نمونه برای لاگ."
+        },
+        {
+          "id": "log7",
+          "action": "اعطای مدال چشم عقاب",
+          "dateTime": "۱۴۰۴/۰۶/۱۰ - ۰۹:۰۰",
+          "author": "سیستم",
+          "description": "توضیح نمونه برای لاگ."
+        }
+      ],
+      "notes": [
+        {
+          "id": "n4",
+          "date": "۱۴۰۴/۱۰/۰۲",
+          "note": "به دلیل مشکل در پرداخت قسط، دسترسی ایشان به طور موقت مسدود شده است.",
+          "author": "مریم احمدی"
+        },
+        {
+          "id": "n5",
+          "date": "۱۴۰۴/۱۰/۱۵",
+          "note": "در تماس تلفنی، قول پرداخت بدهی تا آخر هفته را دادند.",
+          "author": "حسین کریمی"
+        }
+      ]
+    },
+    {
+      "id": 203,
+      "name": "علی یوسفی",
+      "phone": "09199876543",
+      "city": "اصفهان",
+      "birthYear": 1368,
+      "enrollments": [
+        { "courseId": "c2", "termId": "t76" },
+        { "courseId": "c1", "termId": "t75" }
+      ],
+      "apollonyarId": "ap3",
+      "totalCourseFee": 5000000,
+      "status": "انصراف",
+      "studentType": "ترمی",
+      "accessStatus": "فعال",
+      "enrollmentStatus": "فارغ‌التحصیل",
+      "earnedMedalIds": [],
+      "hearts": 1,
+      "score": 2.1,
+      "watchTime": 28.2,
+      "totalWatchTime": 35,
+      "chapterProgress": [
+        { "chapterId": "c1ch1", "progressPercent": 100 },
+        { "chapterId": "c1ch2", "progressPercent": 100 },
+        { "chapterId": "c1ch3", "progressPercent": 100 },
+        { "chapterId": "c1ch4", "progressPercent": 100 },
+        { "chapterId": "c1ch5", "progressPercent": 100 },
+        { "chapterId": "c1ch6", "progressPercent": 90 },
+        { "chapterId": "c1ch7", "progressPercent": 90 },
+        { "chapterId": "c1ch8", "progressPercent": 0 },
+        { "chapterId": "c1ch9", "progressPercent": 0 },
+        { "chapterId": "c1ch10", "progressPercent": 0 }
+      ],
+      "actionLogs": [
+        {
+          "id": "log8",
+          "action": "تغییر وضعیت به انصراف",
+          "dateTime": "۱۴۰۴/۰۶/۰۱ - ۱۱:۳۰",
+          "author": "علی رضایی",
+          "description": "توضیح نمونه برای لاگ."
+        }
+      ],
+      "notes": [
+        {
+          "id": "n6",
+          "date": "۱۴۰۴/۰۶/۰۵",
+          "note": "در تماس تلفنی بسیار با انگیزه به نظر می‌رسید. مستعد دریافت مدال خلاقیت است.",
+          "author": "مریم احمدی"
+        },
+        {
+          "id": "n7",
+          "date": "۱۴۰۴/۰۶/۲۰",
+          "note": "نیاز به پیگیری برای تکلیف دوم دارد.",
+          "author": "مریم احمدی"
+        },
+        {
+          "id": "n8",
+          "date": "۱۴۰۴/۰۷/۰۱",
+          "note": "این هنرجو مشکل ناشنوایی دارد.",
+          "author": "مریم احمدی"
+        }
+      ]
+    },
+    {
+      "id": 204,
+      "name": "نگار جعفری",
+      "phone": "09120001122",
+      "city": "شیراز",
+      "birthYear": 1386,
+      "enrollments": [
+        { "courseId": "c4", "termId": "t81" },
+        { "courseId": "c3", "termId": "t79" }
+      ],
+      "apollonyarId": "ap4",
+      "totalCourseFee": 5000000,
+      "status": "آزاد",
+      "studentType": "خودخوان",
+      "accessStatus": "فعال",
+      "enrollmentStatus": "در حین آموزش",
+      "earnedMedalIds": ["m1", "m2", "m5"],
+      "hearts": 3,
+      "score": 3.0,
+      "watchTime": 19.8,
+      "totalWatchTime": 25,
+      "chapterProgress": [
+        { "chapterId": "c1ch1", "progressPercent": 100 },
+        { "chapterId": "c1ch2", "progressPercent": 30 },
+        { "chapterId": "c1ch3", "progressPercent": 20 },
+        { "chapterId": "c1ch4", "progressPercent": 10 },
+        { "chapterId": "c1ch5", "progressPercent": 40 },
+        { "chapterId": "c1ch6", "progressPercent": 0 },
+        { "chapterId": "c1ch7", "progressPercent": 50 },
+        { "chapterId": "c1ch8", "progressPercent": 0 },
+        { "chapterId": "c1ch9", "progressPercent": 100 },
+        { "chapterId": "c1ch10", "progressPercent": 0 }
+      ],
+      "actionLogs": [
+        {
+          "id": "log9",
+          "action": "تغییر وضعیت به آزاد",
+          "dateTime": "۱۴۰۴/۰۶/۰۱ - ۱۱:۳۰",
+          "author": "علی رضایی",
+          "description": "توضیح نمونه برای لاگ."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": 205,
+      "name": "کیان صالحی",
+      "phone": "09101112233",
+      "city": "کرج",
+      "birthYear": 1374,
+      "enrollments": [
+        { "courseId": "c1", "termId": "t75" },
+        { "courseId": "c2", "termId": "t76" }
+      ],
+      "apollonyarId": "ap1",
+      "status": "آزاد",
+      "studentType": "ترمی",
+      "accessStatus": "غیرفعال (تکلیف)",
+      "enrollmentStatus": "در حین آموزش",
+      "earnedMedalIds": ["m3", "m4"],
+      "hearts": 3,
+      "score": 2.8,
+      "watchTime": 25.0,
+      "totalWatchTime": 30,
+      "actionLogs": [],
+      "notes": []
+    },
+    {
+      "id": 206,
+      "name": "مریم اکبری",
+      "phone": "09102223344",
+      "city": "تهران",
+      "birthYear": 1390,
+      "enrollments": [{ "courseId": "c2", "termId": "t77" }],
+      "apollonyarId": "ap2",
+      "status": "آزاد",
+      "studentType": "ترمی",
+      "accessStatus": "فعال",
+      "enrollmentStatus": "در انتظار شروع ترم",
+      "earnedMedalIds": [],
+      "hearts": 3,
+      "score": 0.0,
+      "watchTime": 0,
+      "totalWatchTime": 40,
+      "actionLogs": [],
+      "notes": []
+    },
+    {
+      "id": 207,
+      "name": "محمد حسامی",
+      "phone": "09103334455",
+      "city": "اهواز",
+      "birthYear": 1365,
+      "enrollments": [
+        { "courseId": "c3", "termId": "t79" },
+        { "courseId": "c4", "termId": "t80" }
+      ],
+      "apollonyarId": "ap3",
+      "status": "آزاد",
+      "studentType": "خودخوان",
+      "accessStatus": "فعال",
+      "enrollmentStatus": "در حین آموزش",
+      "earnedMedalIds": ["m1", "m5"],
+      "hearts": 2,
+      "score": 2.5,
+      "watchTime": 30.5,
+      "totalWatchTime": 38,
+      "actionLogs": [],
+      "notes": []
+    },
+    {
+      "id": 208,
+      "name": "زهرا نوری",
+      "phone": "09104445566",
+      "city": "کرمانشاه",
+      "birthYear": 1371,
+      "enrollments": [{ "courseId": "c4", "termId": "t80" }],
+      "apollonyarId": "ap4",
+      "status": "مسدود",
+      "studentType": "ترمی",
+      "accessStatus": "فعال",
+      "enrollmentStatus": "فرم پرنکرده",
+      "earnedMedalIds": [],
+      "hearts": 0,
+      "score": 1.5,
+      "watchTime": 5.0,
+      "totalWatchTime": 25,
+      "actionLogs": [],
+      "notes": []
+    },
+    {
+      "id": 209,
+      "name": "امیر قاسمی",
+      "phone": "09105556677",
+      "city": "تبریز",
+      "birthYear": 1369,
+      "enrollments": [{ "courseId": "c1", "termId": "t82" }],
+      "apollonyarId": "ap1",
+      "status": "آزاد",
+      "studentType": "ترمی",
+      "accessStatus": "فعال",
+      "enrollmentStatus": "در حین آموزش",
+      "earnedMedalIds": ["m2", "m3", "m4"],
+      "hearts": 3,
+      "score": 2.9,
+      "watchTime": 18.0,
+      "totalWatchTime": 30,
+      "actionLogs": [],
+      "notes": []
+    },
+    {
+      "id": 210,
+      "name": "یلدا احمدی",
+      "phone": "09106667788",
+      "city": "رشت",
+      "birthYear": 1388,
+      "enrollments": [{ "courseId": "c2", "termId": "t83" }],
+      "apollonyarId": "ap2",
+      "status": "انصراف",
+      "studentType": "ترمی",
+      "accessStatus": "فعال",
+      "enrollmentStatus": "در حین آموزش",
+      "earnedMedalIds": [],
+      "hearts": 1,
+      "score": 1.8,
+      "watchTime": 12.0,
+      "totalWatchTime": 35,
+      "actionLogs": [],
+      "notes": []
+    },
+    {
+      "id": 211,
+      "name": "فریدون کریمی",
+      "phone": "09107778899",
+      "city": "قزوین",
+      "birthYear": 1362,
+      "enrollments": [{ "courseId": "c1", "termId": "t74" }],
+      "apollonyarId": "ap3",
+      "status": "آزاد",
+      "studentType": "خودخوان",
+      "accessStatus": "فعال",
+      "enrollmentStatus": "فارغ‌التحصیل",
+      "earnedMedalIds": ["m1", "m3", "m5"],
+      "hearts": 3,
+      "score": 2.6,
+      "watchTime": 30.0,
+      "totalWatchTime": 30,
+      "actionLogs": [],
+      "notes": []
+    },
+    {
+      "id": 212,
+      "name": "رویا محمدی",
+      "phone": "09108889900",
+      "city": "یزد",
+      "birthYear": 1376,
+      "enrollments": [{ "courseId": "c1", "termId": "t75" }],
+      "apollonyarId": "ap4",
+      "status": "آزاد",
+      "studentType": "ترمی",
+      "accessStatus": "فعال",
+      "enrollmentStatus": "در حین آموزش",
+      "earnedMedalIds": ["m2", "m4"],
+      "hearts": 2,
+      "score": 2.4,
+      "watchTime": 20.0,
+      "totalWatchTime": 30,
+      "actionLogs": [],
+      "notes": []
+    },
+    {
+      "id": 213,
+      "name": "پیمان صالحی",
+      "phone": "09109990011",
+      "city": "زاهدان",
+      "birthYear": 1370,
+      "enrollments": [{ "courseId": "c2", "termId": "t76" }],
+      "apollonyarId": "ap1",
+      "status": "مسدود",
+      "studentType": "ترمی",
+      "accessStatus": "غیرفعال (بدهی)",
+      "enrollmentStatus": "در حین آموزش",
+      "earnedMedalIds": [],
+      "hearts": 1,
+      "score": 2.0,
+      "watchTime": 10.0,
+      "totalWatchTime": 40,
+      "actionLogs": [],
+      "notes": []
+    },
+    {
+      "id": 214,
+      "name": "شیما قاسمی",
+      "phone": "09100001122",
+      "city": "ساری",
+      "birthYear": 1384,
+      "enrollments": [{ "courseId": "c2", "termId": "t77" }],
+      "apollonyarId": "ap2",
+      "status": "آزاد",
+      "studentType": "خودخوان",
+      "accessStatus": "فعال",
+      "enrollmentStatus": "در حین آموزش",
+      "earnedMedalIds": ["m5"],
+      "hearts": 3,
+      "score": 2.8,
+      "watchTime": 35.0,
+      "totalWatchTime": 38,
+      "actionLogs": [],
+      "notes": []
+    },
+    {
+      "id": 215,
+      "name": "کوروش اکبری",
+      "phone": "09101112234",
+      "city": "بوشهر",
+      "birthYear": 1364,
+      "enrollments": [{ "courseId": "c3", "termId": "t78" }],
+      "apollonyarId": "ap3",
+      "status": "آزاد",
+      "studentType": "ترمی",
+      "accessStatus": "فعال",
+      "enrollmentStatus": "در حین آموزش",
+      "earnedMedalIds": ["m1", "m2", "m3"],
+      "hearts": 3,
+      "score": 2.7,
+      "watchTime": 24.0,
+      "totalWatchTime": 30,
+      "actionLogs": [],
+      "notes": []
+    },
+    {
+      "id": 216,
+      "name": "لیلا نوری",
+      "phone": "09102223345",
+      "city": "همدان",
+      "birthYear": 1378,
+      "enrollments": [{ "courseId": "c3", "termId": "t79" }],
+      "apollonyarId": "ap4",
+      "status": "انصراف",
+      "studentType": "ترمی",
+      "accessStatus": "فعال",
+      "enrollmentStatus": "در حین آموزش",
+      "earnedMedalIds": [],
+      "hearts": 0,
+      "score": 1.2,
+      "watchTime": 8.0,
+      "totalWatchTime": 25,
+      "actionLogs": [],
+      "notes": []
+    },
+    {
+      "id": 217,
+      "name": "آرش حسینی",
+      "phone": "09103334456",
+      "city": "سنندج",
+      "birthYear": 1367,
+      "enrollments": [{ "courseId": "c4", "termId": "t80" }],
+      "apollonyarId": "ap1",
+      "status": "آزاد",
+      "studentType": "ترمی",
+      "accessStatus": "غیرفعال (تکلیف)",
+      "enrollmentStatus": "در حین آموزش",
+      "earnedMedalIds": ["m2", "m3"],
+      "hearts": 2,
+      "score": 2.6,
+      "watchTime": 21.0,
+      "totalWatchTime": 30,
+      "actionLogs": [],
+      "notes": []
+    },
+    {
+      "id": 218,
+      "name": "مهسا محمدی",
+      "phone": "09104445567",
+      "city": "اراک",
+      "birthYear": 1380,
+      "enrollments": [{ "courseId": "c4", "termId": "t81" }],
+      "apollonyarId": "ap2",
+      "status": "آزاد",
+      "studentType": "خودخوان",
+      "accessStatus": "فعال",
+      "enrollmentStatus": "در حین آموزش",
+      "earnedMedalIds": ["m1", "m4", "m5"],
+      "hearts": 3,
+      "score": 2.9,
+      "watchTime": 28.0,
+      "totalWatchTime": 35,
+      "actionLogs": [],
+      "notes": []
+    },
+    {
+      "id": 219,
+      "name": "نیما یوسفی",
+      "phone": "09105556678",
+      "city": "سمنان",
+      "birthYear": 1361,
+      "enrollments": [{ "courseId": "c1", "termId": "t82" }],
+      "apollonyarId": "ap3",
+      "status": "مسدود",
+      "studentType": "ترمی",
+      "accessStatus": "فعال",
+      "enrollmentStatus": "در انتظار شروع ترم",
+      "earnedMedalIds": [],
+      "hearts": 3,
+      "score": 0.0,
+      "watchTime": 0.0,
+      "totalWatchTime": 40,
+      "actionLogs": [],
+      "notes": []
+    },
+    {
+      "id": 220,
+      "name": "هما جعفری",
+      "phone": "09106667789",
+      "city": "ارومیه",
+      "birthYear": 1382,
+      "enrollments": [{ "courseId": "c2", "termId": "t83" }],
+      "apollonyarId": "ap4",
+      "status": "آزاد",
+      "studentType": "ترمی",
+      "accessStatus": "فعال",
+      "enrollmentStatus": "در حین آموزش",
+      "earnedMedalIds": ["m1", "m3", "m5"],
+      "hearts": 3,
+      "score": 2.8,
+      "watchTime": 26.0,
+      "totalWatchTime": 30,
+      "actionLogs": [],
+      "notes": []
+    }
+  ],
+  "assignments": [
+    {
+      "id": "as1",
+      "assignmentDefId": "c1a1",
+      "studentId": 201,
+      "assignmentTitle": "اصول اولیه انتخاب و برش",
+      "status": "بررسی شده",
+      "submissionDate": "۱۴۰۴/۰۶/۱۰",
+      "reviewDate": "۱۴۰۴/۰۶/۱۳",
+      "grade": 3,
+      "templateFiles": [
+        { "id": "t1", "name": "برش مدل", "url": "https://picsum.photos/400/300?random=1" }
+      ],
+      "submissions": [
+        {
+          "version": 2,
+          "date": "۱۴۰۴/۰۶/۱۲",
+          "grade": 3,
+          "submittedFiles": [
+            {
+              "templateId": "t1",
+              "name": "برش نهایی",
+              "url": "https://picsum.photos/400/300?random=2"
+            }
+          ],
+          "feedback": "عالی شده! دقت در برش خیلی بهتر از نسخه قبلی بود."
+        },
+        {
+          "version": 1,
+          "date": "۱۴۰۴/۰۶/۱۰",
+          "grade": 1,
+          "submittedFiles": [
+            {
+              "templateId": "t1",
+              "name": "برش اولیه",
+              "url": "https://picsum.photos/400/300?random=3"
+            }
+          ],
+          "feedback": "نیاز به دقت بیشتری در لبه‌های سوژه هست."
+        }
+      ]
+    },
+    {
+      "id": "as2",
+      "assignmentDefId": "c1a2",
+      "studentId": 201,
+      "assignmentTitle": "کار با لایه‌ها و ماسک",
+      "status": "در انتظار بررسی",
+      "submissionDate": "۱۴۰۴/۰۶/۱۸",
+      "reviewDate": "-",
+      "grade": null,
+      "templateFiles": [
+        { "id": "t1", "name": "پوستر خام", "url": "https://picsum.photos/400/300?random=4" }
+      ],
+      "submissions": [
+        {
+          "version": 1,
+          "date": "۱۴۰۴/۰۶/۱۸",
+          "grade": null,
+          "submittedFiles": [
+            {
+              "templateId": "t1",
+              "name": "پوستر نهایی",
+              "url": "https://picsum.photos/400/300?random=5"
+            }
+          ],
+          "feedback": ""
+        }
+      ]
+    },
+    {
+      "id": "as3",
+      "assignmentDefId": "c1a3",
+      "studentId": 202,
+      "assignmentTitle": "طراحی لوگو با اشکال پایه",
+      "status": "بررسی شده",
+      "submissionDate": "۱۴۰۴/۱۰/۱۲",
+      "reviewDate": "۱۴۰۴/۱۰/۱۴",
+      "grade": 2,
+      "templateFiles": [
+        { "id": "t1", "name": "اتود اولیه", "url": "https://picsum.photos/400/300?random=6" }
+      ],
+      "submissions": [
+        {
+          "version": 1,
+          "date": "۱۴۰۴/۱۰/۱۲",
+          "grade": 2,
+          "submittedFiles": [
+            {
+              "templateId": "t1",
+              "name": "لوگو نهایی",
+              "url": "https://picsum.photos/400/300?random=7"
+            }
+          ],
+          "feedback": "ایده خوبه ولی روی تراز بودن و ضخامت خطوط بیشتر کار کن."
+        }
+      ]
+    },
+    {
+      "id": "as4",
+      "assignmentDefId": "c1a4",
+      "studentId": 203,
+      "assignmentTitle": "کات زدن ویدیو",
+      "status": "بررسی شده",
+      "submissionDate": "۱۴۰۴/۰۷/۲۲",
+      "reviewDate": "۱۴۰۴/۰۷/۲۴",
+      "grade": "مردود",
+      "templateFiles": [
+        { "id": "t1", "name": "فوتیج خام", "url": "https://picsum.photos/400/300?random=8" }
+      ],
+      "submissions": [
+        {
+          "version": 1,
+          "date": "۱۴۰۴/۰۷/۲۲",
+          "grade": 1,
+          "submittedFiles": [
+            {
+              "templateId": "t1",
+              "name": "ویدیوی کات خورده",
+              "url": "https://picsum.photos/400/300?random=9"
+            }
+          ],
+          "feedback": "بعضی از کات‌ها هماهنگ با ریتم موسیقی نیست. لطفا بازبینی کن."
+        }
+      ]
+    },
+    {
+      "id": "as5",
+      "assignmentDefId": "c2a1",
+      "studentId": 201,
+      "assignmentTitle": "ترکیب تصاویر",
+      "status": "بررسی شده",
+      "submissionDate": "۱۴۰۴/۰۶/۲۵",
+      "reviewDate": "۱۴۰۴/۰۶/۲۷",
+      "grade": 3,
+      "templateFiles": [
+        { "id": "t1", "name": "منظره", "url": "https://picsum.photos/400/300?random=10" },
+        { "id": "t2", "name": "حیوان", "url": "https://picsum.photos/400/300?random=11" }
+      ],
+      "submissions": [
+        {
+          "version": 1,
+          "date": "۱۴۰۴/۰۶/۲۵",
+          "grade": 3,
+          "submittedFiles": [
+            {
+              "templateId": "t1",
+              "name": "تصویر A",
+              "url": "https://picsum.photos/400/300?random=12"
+            },
+            {
+              "templateId": "t2",
+              "name": "تصویر B",
+              "url": "https://picsum.photos/400/300?random=13"
+            }
+          ],
+          "feedback": "ترکیب رنگ و نور بسیار حرفه‌ای انجام شده. آفرین!"
+        }
+      ]
+    },
+    {
+      "id": "as6",
+      "assignmentDefId": "c1a2",
+      "studentId": 202,
+      "assignmentTitle": "کار با ابزار Pen",
+      "status": "در انتظار بررسی",
+      "submissionDate": "۱۴۰۴/۱۰/۲۰",
+      "reviewDate": "-",
+      "grade": null,
+      "templateFiles": [
+        { "id": "t1", "name": "طرح اولیه", "url": "https://picsum.photos/400/300?random=14" }
+      ],
+      "submissions": [
+        {
+          "version": 2,
+          "date": "۱۴۰۴/۱۰/۲۲",
+          "grade": null,
+          "submittedFiles": [
+            {
+              "templateId": "t1",
+              "name": "اصلاحیه",
+              "url": "https://picsum.photos/400/300?random=15"
+            }
+          ],
+          "feedback": ""
+        },
+        {
+          "version": 1,
+          "date": "۱۴۰۴/۱۰/۲۰",
+          "grade": 1,
+          "submittedFiles": [
+            {
+              "templateId": "t1",
+              "name": "نسخه اول",
+              "url": "https://picsum.photos/400/300?random=16"
+            }
+          ],
+          "feedback": "انحنای خطوط نرم نیست و شکستگی داره."
+        }
+      ]
+    },
+    {
+      "id": "as7",
+      "assignmentDefId": "c3a1",
+      "studentId": 203,
+      "assignmentTitle": "صداگذاری روی ویدیو",
+      "status": "در انتظار بررسی",
+      "submissionDate": "۱۴۰۴/۰۸/۰۱",
+      "reviewDate": "-",
+      "grade": null,
+      "templateFiles": [
+        { "id": "t1", "name": "ویدیوی بی‌صدا", "url": "https://picsum.photos/400/300?random=17" }
+      ],
+      "submissions": [
+        {
+          "version": 1,
+          "date": "۱۴۰۴/۰۸/۰۱",
+          "grade": null,
+          "submittedFiles": [
+            {
+              "templateId": "t1",
+              "name": "ویدیوی نهایی",
+              "url": "https://picsum.photos/400/300?random=18"
+            }
+          ],
+          "feedback": ""
+        }
+      ]
+    },
+    {
+      "id": "as8",
+      "assignmentDefId": "c4a1",
+      "studentId": 202,
+      "assignmentTitle": "طراحی کاراکتر",
+      "status": "بررسی شده",
+      "submissionDate": "۱۴۰۴/۱۰/۲۸",
+      "reviewDate": "۱۴۰۴/۱۰/۳۰",
+      "grade": 3,
+      "templateFiles": [
+        { "id": "t1", "name": "کانسپت", "url": "https://picsum.photos/400/300?random=19" }
+      ],
+      "submissions": [
+        {
+          "version": 1,
+          "date": "۱۴۰۴/۱۰/۲۸",
+          "grade": 3,
+          "submittedFiles": [
+            {
+              "templateId": "t1",
+              "name": "کاراکتر نهایی",
+              "url": "https://picsum.photos/400/300?random=20"
+            }
+          ],
+          "feedback": "خلاقانه و جذاب!"
+        }
+      ]
+    },
+    {
+      "id": "as9",
+      "assignmentDefId": "c1a1",
+      "studentId": 203,
+      "assignmentTitle": "اصلاح رنگ و نور",
+      "status": "بررسی شده",
+      "submissionDate": "۱۴۰۴/۰۸/۱۰",
+      "reviewDate": "۱۴۰۴/۰۸/۱۱",
+      "grade": 2,
+      "templateFiles": [
+        { "id": "t1", "name": "ویدیوی خام", "url": "https://picsum.photos/400/300?random=21" }
+      ],
+      "submissions": [
+        {
+          "version": 1,
+          "date": "۱۴۰۴/۰۸/۱۰",
+          "grade": 2,
+          "submittedFiles": [
+            {
+              "templateId": "t1",
+              "name": "نسخه اصلاح شده",
+              "url": "https://picsum.photos/400/300?random=22"
+            }
+          ],
+          "feedback": "اصلاح رنگ خوبه، ولی کنتراست تصویر کمی زیاده."
+        }
+      ]
+    },
+    {
+      "id": "as10",
+      "assignmentDefId": "c1a2",
+      "studentId": 201,
+      "assignmentTitle": "پروژه نهایی فتوشاپ",
+      "status": "در انتظار بررسی",
+      "submissionDate": "۱۴۰۴/۰۷/۰۵",
+      "reviewDate": "-",
+      "grade": null,
+      "templateFiles": [
+        { "id": "t1", "name": "شرح پروژه", "url": "https://picsum.photos/400/300?random=23" }
+      ],
+      "submissions": [
+        {
+          "version": 1,
+          "date": "۱۴۰۴/۰۷/۰۵",
+          "grade": null,
+          "submittedFiles": [
+            {
+              "templateId": "t1",
+              "name": "پروژه نهایی",
+              "url": "https://picsum.photos/400/300?random=24"
+            }
+          ],
+          "feedback": ""
+        }
+      ]
+    }
+  ],
+  "calls": [
+    {
+      "id": "cl1",
+      "callDefId": "c1call1",
+      "studentId": 201,
+      "apollonyarId": "ap1",
+      "termId": "t74",
+      "topic": "تماس اول",
+      "callStatus": "موفق",
+      "previousCallTopic": null,
+      "daysToCallWindow": 14,
+      "previousCallDate": null,
+      "description": "در تماس اول، هنرجو بسیار با انگیزه بود و سوالات خوبی در مورد کلیات دوره پرسید."
+    },
+    {
+      "id": "cl2",
+      "callDefId": "c1call2",
+      "studentId": 201,
+      "apollonyarId": "ap1",
+      "termId": "t74",
+      "topic": "تماس دوم",
+      "callStatus": "موفق",
+      "previousCallTopic": "تماس اول",
+      "daysToCallWindow": 10,
+      "previousCallDate": "۱۴۰۴/۰۶/۰۵",
+      "description": "مشکلات هنرجو در مورد نصب نرم‌افزارها برطرف شد."
+    },
+    {
+      "id": "cl3",
+      "callDefId": "c1call3",
+      "studentId": 201,
+      "apollonyarId": "ap1",
+      "termId": "t74",
+      "topic": "تماس سوم",
+      "callStatus": "موفق",
+      "previousCallTopic": "تماس دوم",
+      "daysToCallWindow": 7,
+      "previousCallDate": "۱۴۰۴/۰۶/۱۲",
+      "description": "در مورد تکلیف اول صحبت و راهنمایی‌های لازم ارائه شد."
+    },
+    {
+      "id": "cl4",
+      "callDefId": "c1call4",
+      "studentId": 201,
+      "apollonyarId": "ap1",
+      "termId": "t74",
+      "topic": "تماس چهارم",
+      "callStatus": "در آینده",
+      "previousCallTopic": "تماس سوم",
+      "daysToCallWindow": 5,
+      "previousCallDate": "۱۴۰۴/۰۶/۱۹",
+      "description": ""
+    },
+    {
+      "id": "cl5",
+      "callDefId": "c1call5",
+      "studentId": 205,
+      "apollonyarId": "ap1",
+      "termId": "t75",
+      "topic": "تماس اول",
+      "callStatus": "موفق",
+      "previousCallTopic": null,
+      "daysToCallWindow": 14,
+      "previousCallDate": null,
+      "description": ""
+    },
+    {
+      "id": "cl6",
+      "callDefId": "c2call1",
+      "studentId": 205,
+      "apollonyarId": "ap1",
+      "termId": "t75",
+      "topic": "تماس دوم",
+      "callStatus": "برای انجام",
+      "previousCallTopic": "تماس اول",
+      "daysToCallWindow": 8,
+      "previousCallDate": "۱۴۰۴/۰۸/۱۰",
+      "description": "تماس برای پیگیری وضعیت تکلیف دوم برنامه‌ریزی شده است."
+    },
+    {
+      "id": "cl7",
+      "callDefId": "c2call2",
+      "studentId": 211,
+      "apollonyarId": "ap3",
+      "termId": "t74",
+      "topic": "تماس اول",
+      "callStatus": "موفق",
+      "previousCallTopic": null,
+      "daysToCallWindow": 14,
+      "previousCallDate": null,
+      "description": ""
+    },
+    {
+      "id": "cl8",
+      "callDefId": "c2call3",
+      "studentId": 211,
+      "apollonyarId": "ap3",
+      "termId": "t74",
+      "topic": "تماس دوم",
+      "callStatus": "موفق",
+      "previousCallTopic": "تماس اول",
+      "daysToCallWindow": 10,
+      "previousCallDate": "۱۴۰۴/۰۶/۰۸",
+      "description": ""
+    },
+    {
+      "id": "cl9",
+      "callDefId": "c2call4",
+      "studentId": 212,
+      "apollonyarId": "ap4",
+      "termId": "t75",
+      "topic": "تماس اول",
+      "callStatus": "بی‌پاسخ",
+      "previousCallTopic": null,
+      "daysToCallWindow": 14,
+      "previousCallDate": null,
+      "description": "تلاش برای برقراری تماس اول ناموفق بود. مجددا تلاش خواهد شد."
+    },
+    {
+      "id": "cl10",
+      "callDefId": "c2call5",
+      "studentId": 212,
+      "apollonyarId": "ap4",
+      "termId": "t75",
+      "topic": "تماس دوم",
+      "callStatus": "برای انجام",
+      "previousCallTopic": "تماس اول",
+      "daysToCallWindow": 8,
+      "previousCallDate": "۱۴۰۴/۰۸/۱۵",
+      "description": ""
+    },
+    {
+      "id": "cl11",
+      "callDefId": "c3call1",
+      "studentId": 209,
+      "apollonyarId": "ap1",
+      "termId": "t82",
+      "topic": "تماس اول",
+      "callStatus": "برای انجام",
+      "previousCallTopic": null,
+      "daysToCallWindow": 14,
+      "previousCallDate": null,
+      "description": ""
+    },
+    {
+      "id": "cl12",
+      "callDefId": "c3call2",
+      "studentId": 203,
+      "apollonyarId": "ap3",
+      "termId": "t76",
+      "topic": "تماس اول",
+      "callStatus": "موفق",
+      "previousCallTopic": null,
+      "daysToCallWindow": 14,
+      "previousCallDate": null,
+      "description": ""
+    },
+    {
+      "id": "cl13",
+      "callDefId": "c3call3",
+      "studentId": 203,
+      "apollonyarId": "ap3",
+      "termId": "t76",
+      "topic": "تماس انصراف",
+      "callStatus": "سوخته",
+      "previousCallTopic": "تماس اول",
+      "daysToCallWindow": 3,
+      "previousCallDate": "۱۴۰۴/۰۷/۰۸",
+      "description": "هنرجو به دلیل مشکلات شخصی از ادامه دوره انصراف داد. تماس برای پیگیری بیشتر بی‌پاسخ ماند."
+    },
+    {
+      "id": "cl14",
+      "callDefId": "c3call4",
+      "studentId": 206,
+      "apollonyarId": "ap2",
+      "termId": "t77",
+      "topic": "تماس اول",
+      "callStatus": "موفق",
+      "previousCallTopic": null,
+      "daysToCallWindow": 14,
+      "previousCallDate": null,
+      "description": ""
+    },
+    {
+      "id": "cl15",
+      "callDefId": "c3call5",
+      "studentId": 206,
+      "apollonyarId": "ap2",
+      "termId": "t77",
+      "topic": "تماس دوم",
+      "callStatus": "برای انجام",
+      "previousCallTopic": "تماس اول",
+      "daysToCallWindow": 8,
+      "previousCallDate": "۱۴۰۴/۰۹/۱۰",
+      "description": ""
+    },
+    {
+      "id": "cl16",
+      "callDefId": "c4call1",
+      "studentId": 213,
+      "apollonyarId": "ap1",
+      "termId": "t76",
+      "topic": "تماس اول",
+      "callStatus": "موفق",
+      "previousCallTopic": null,
+      "daysToCallWindow": 14,
+      "previousCallDate": null,
+      "description": ""
+    },
+    {
+      "id": "cl17",
+      "callDefId": "c4call2",
+      "studentId": 214,
+      "apollonyarId": "ap2",
+      "termId": "t77",
+      "topic": "تماس اول",
+      "callStatus": "موفق",
+      "previousCallTopic": null,
+      "daysToCallWindow": 14,
+      "previousCallDate": null,
+      "description": ""
+    },
+    {
+      "id": "cl18",
+      "callDefId": "c4call3",
+      "studentId": 220,
+      "apollonyarId": "ap4",
+      "termId": "t83",
+      "topic": "تماس اول",
+      "callStatus": "برای انجام",
+      "previousCallTopic": null,
+      "daysToCallWindow": 14,
+      "previousCallDate": null,
+      "description": ""
+    },
+    {
+      "id": "cl19",
+      "callDefId": "c4call4",
+      "studentId": 220,
+      "apollonyarId": "ap4",
+      "termId": "t83",
+      "topic": "تماس دوم",
+      "callStatus": "در آینده",
+      "previousCallTopic": "تماس اول",
+      "daysToCallWindow": 10,
+      "previousCallDate": "۱۴۰۵/۰۳/۱۵",
+      "description": ""
+    },
+    {
+      "id": "cl20",
+      "callDefId": "c4call5",
+      "studentId": 204,
+      "apollonyarId": "ap4",
+      "termId": "t81",
+      "topic": "تماس اول",
+      "callStatus": "موفق",
+      "previousCallTopic": null,
+      "daysToCallWindow": 14,
+      "previousCallDate": null,
+      "description": ""
+    },
+    {
+      "id": "cl21",
+      "callDefId": "c5call1",
+      "studentId": 204,
+      "apollonyarId": "ap4",
+      "termId": "t81",
+      "topic": "تماس دوم",
+      "callStatus": "بی‌پاسخ",
+      "previousCallTopic": "تماس اول",
+      "daysToCallWindow": 10,
+      "previousCallDate": "۱۴۰۵/۰۱/۱۵",
+      "description": ""
+    },
+    {
+      "id": "cl22",
+      "callDefId": "c5call2",
+      "studentId": 208,
+      "apollonyarId": "ap4",
+      "termId": "t80",
+      "topic": "تماس اول",
+      "callStatus": "موفق",
+      "previousCallTopic": null,
+      "daysToCallWindow": 14,
+      "previousCallDate": null,
+      "description": ""
+    },
+    {
+      "id": "cl23",
+      "callDefId": "c5call3",
+      "studentId": 208,
+      "apollonyarId": "ap4",
+      "termId": "t80",
+      "topic": "تماس دوم",
+      "callStatus": "موفق",
+      "previousCallTopic": "تماس اول",
+      "daysToCallWindow": 10,
+      "previousCallDate": "۱۴۰۴/۱۱/۲۰",
+      "description": ""
+    },
+    {
+      "id": "cl24",
+      "callDefId": "c5call4",
+      "studentId": 208,
+      "apollonyarId": "ap4",
+      "termId": "t80",
+      "topic": "تماس سوم",
+      "callStatus": "سوخته",
+      "previousCallTopic": "تماس دوم",
+      "daysToCallWindow": 4,
+      "previousCallDate": "۱۴۰۴/۱۱/۲۵",
+      "description": ""
+    },
+    {
+      "id": "cl25",
+      "callDefId": "c5call5",
+      "studentId": 217,
+      "apollonyarId": "ap1",
+      "termId": "t80",
+      "topic": "تماس اول",
+      "callStatus": "موفق",
+      "previousCallTopic": null,
+      "daysToCallWindow": 14,
+      "previousCallDate": null,
+      "description": ""
+    },
+    {
+      "id": "cl26",
+      "callDefId": "c1call1",
+      "studentId": 217,
+      "apollonyarId": "ap1",
+      "termId": "t80",
+      "topic": "تماس دوم",
+      "callStatus": "موفق",
+      "previousCallTopic": "تماس اول",
+      "daysToCallWindow": 10,
+      "previousCallDate": "۱۴۰۴/۱۱/۲۵",
+      "description": ""
+    },
+    {
+      "id": "cl27",
+      "callDefId": "c1call2",
+      "studentId": 217,
+      "apollonyarId": "ap1",
+      "termId": "t80",
+      "topic": "تماس سوم",
+      "callStatus": "موفق",
+      "previousCallTopic": "تماس دوم",
+      "daysToCallWindow": 7,
+      "previousCallDate": "۱۴۰۴/۱۱/۲۸",
+      "description": ""
+    },
+    {
+      "id": "cl28",
+      "callDefId": "c1call3",
+      "studentId": 217,
+      "apollonyarId": "ap1",
+      "termId": "t80",
+      "topic": "تماس چهارم",
+      "callStatus": "برای انجام",
+      "previousCallTopic": "تماس سوم",
+      "daysToCallWindow": 6,
+      "previousCallDate": "۱۴۰۴/۱۲/۰۵",
+      "description": ""
+    },
+    {
+      "id": "cl29",
+      "callDefId": "c1call4",
+      "studentId": 218,
+      "apollonyarId": "ap2",
+      "termId": "t81",
+      "topic": "تماس اول",
+      "callStatus": "موفق",
+      "previousCallTopic": null,
+      "daysToCallWindow": 14,
+      "previousCallDate": null,
+      "description": ""
+    },
+    {
+      "id": "cl30",
+      "callDefId": "c1call5",
+      "studentId": 218,
+      "apollonyarId": "ap2",
+      "termId": "t81",
+      "topic": "تماس دوم",
+      "callStatus": "برای انجام",
+      "previousCallTopic": "تماس اول",
+      "daysToCallWindow": 10,
+      "previousCallDate": "۱۴۰۵/۰۲/۰۱",
+      "description": ""
+    }
+  ],
+  "transactions": [
+    {
+      "id": "tr1",
+      "studentId": 201,
+      "type": "واریز",
+      "amount": 2500000,
+      "dateTime": "۱۴۰۴/۰۶/۰۱ - ۱۱:۳۰",
+      "trackingNumber": "112233445",
+      "paymentMethod": "درگاه پرداخت",
+      "status": "تأیید",
+      "notes": [
+        {
+          "author": "علی رضایی",
+          "date": "۱۴۰۴/۰۶/۰۱ - ۱۱:۳۲",
+          "text": "وضعیت توسط کاربر به «تأیید» تغییر کرد."
+        },
+        { "author": "سیستم", "date": "۱۴۰۴/۰۶/۰۱ - ۱۱:۳۰", "text": "تراکنش ثبت شد." }
+      ]
+    },
+    {
+      "id": "tr2",
+      "studentId": 201,
+      "type": "واریز",
+      "amount": 1250000,
+      "dateTime": "۱۴۰۴/۰۶/۰۵ - ۱۶:۰۰",
+      "trackingNumber": "223344556",
+      "paymentMethod": "کارت به کارت",
+      "status": "تأیید",
+      "receiptImageUrl": "https://img.freepik.com/premium-vector/receipt-template-collection-with-realistic-design_23-2147917745.jpg?semt=ais_incoming&w=740&q=80",
+      "notes": [
+        {
+          "author": "سیستم",
+          "date": "۱۴۰۴/۰۶/۰۵ - ۱۶:۰۰",
+          "text": "تراکنش ثبت شد و در انتظار بررسی است."
+        }
+      ]
+    },
+    {
+      "id": "tr3",
+      "studentId": 202,
+      "type": "واریز",
+      "amount": 5000000,
+      "dateTime": "۱۴۰۴/۰۶/۰۸ - ۰۹:۱۲",
+      "trackingNumber": "334455667",
+      "paymentMethod": "درگاه پرداخت",
+      "status": "تأیید",
+      "receiptImageUrl": null,
+      "notes": [
+        {
+          "author": "سیستم",
+          "date": "۱۴۰۴/۰۶/۰۸ - ۰۹:۱۲",
+          "text": "پرداخت موفق از طریق درگاه زرین‌پال و تغییر وضعیت به «تأیید»."
+        }
+      ]
+    },
+    {
+      "id": "tr4",
+      "type": "واریز",
+      "amount": 750000,
+      "dateTime": "۱۴۰۴/۰۶/۱۲ - ۱۸:۴۵",
+      "trackingNumber": "445566778",
+      "paymentMethod": "کارت به کارت",
+      "status": "رد",
+      "receiptImageUrl": "https://img.freepik.com/premium-vector/receipt-template-collection-with-realistic-design_23-2147917745.jpg?semt=ais_incoming&w=740&q=80",
+      "notes": [
+        {
+          "author": "علی رضایی",
+          "date": "۱۴۰۴/۰۶/۱۳ - ۱۰:۰۰",
+          "text": "وضعیت توسط کاربر به «رد» تغییر کرد."
+        },
+        { "author": "علی رضایی", "date": "۱۴۰۴/۰۶/۱۳ - ۰۹:۵۹", "text": "رسید نامعتبر است." },
+        { "author": "سیستم", "date": "۱۴۰۴/۰۶/۱۲ - ۱۸:۴۵", "text": "تراکنش ثبت شد." }
+      ]
+    },
+    {
+      "id": "tr5",
+      "type": "برداشت",
+      "amount": 1000000,
+      "dateTime": "۱۴۰۴/۰۶/۱۵ - ۱۱:۰۰",
+      "trackingNumber": "556677889",
+      "paymentMethod": "پایا",
+      "status": "تأیید",
+      "receiptImageUrl": null,
+      "notes": [
+        {
+          "author": "حسابداری",
+          "date": "۱۴۰۴/۰۶/۱۵ - ۱۱:۰۵",
+          "text": "وضعیت توسط سیستم به «تأیید» تغییر کرد."
+        }
+      ]
+    },
+    {
+      "id": "tr6",
+      "type": "واریز",
+      "amount": 5000000,
+      "dateTime": "۱۴۰۴/۰۶/۲۰ - ۱۳:۲۰",
+      "trackingNumber": "667788990",
+      "paymentMethod": "کارت به کارت",
+      "status": "در انتظار",
+      "receiptImageUrl": "https://img.freepik.com/premium-vector/receipt-template-collection-with-realistic-design_23-2147917745.jpg?semt=ais_incoming&w=740&q=80",
+      "notes": [
+        {
+          "author": "سیستم",
+          "date": "۱۴۰۴/۰۶/۲۰ - ۱۳:۲۰",
+          "text": "تراکنش ثبت شد و در انتظار بررسی است."
+        }
+      ]
+    },
+    {
+      "id": "tr7",
+      "type": "واریز",
+      "amount": 800000,
+      "dateTime": "۱۴۰۴/۰۷/۰۱ - ۱۰:۱۰",
+      "trackingNumber": "778899001",
+      "paymentMethod": "کارت به کارت",
+      "status": "تأیید",
+      "receiptImageUrl": "https://img.freepik.com/premium-vector/receipt-template-collection-with-realistic-design_23-2147917745.jpg?semt=ais_incoming&w=740&q=80",
+      "notes": [
+        {
+          "author": "علی رضایی",
+          "date": "۱۴۰۴/۰۷/۰۱ - ۱۰:۱۵",
+          "text": "وضعیت به «تأیید» تغییر کرد."
+        }
+      ]
+    },
+    {
+      "id": "tr8",
+      "type": "واریز",
+      "amount": 950000,
+      "dateTime": "۱۴۰۴/۰۷/۰۳ - ۱۴:۰۰",
+      "trackingNumber": "889900112",
+      "paymentMethod": "کارت به کارت",
+      "status": "در انتظار",
+      "receiptImageUrl": "https://img.freepik.com/premium-vector/receipt-template-collection-with-realistic-design_23-2147917745.jpg?semt=ais_incoming&w=740&q=80",
+      "notes": [
+        {
+          "author": "سیستم",
+          "date": "۱۴۰۴/۰۷/۰۳ - ۱۴:۰۰",
+          "text": "تراکنش ثبت شد و در انتظار بررسی است."
+        }
+      ]
+    },
+    {
+      "id": "tr9",
+      "type": "برداشت",
+      "amount": 300000,
+      "dateTime": "۱۴۰۴/۰۷/۰۵ - ۰۹:۳۰",
+      "trackingNumber": "990011223",
+      "paymentMethod": "پایا",
+      "status": "رد",
+      "receiptImageUrl": null,
+      "notes": [
+        {
+          "author": "حسابداری",
+          "date": "۱۴۰۴/۰۷/۰۶ - ۱۲:۰۰",
+          "text": "عدم موجودی کافی. وضعیت به «رد» تغییر کرد."
+        }
+      ]
+    },
+    {
+      "id": "tr10",
+      "type": "واریز",
+      "amount": 1800000,
+      "dateTime": "۱۴۰۴/۰۷/۱۰ - ۱۷:۵۰",
+      "trackingNumber": "102030405",
+      "paymentMethod": "درگاه پرداخت",
+      "status": "تأیید",
+      "receiptImageUrl": null,
+      "notes": [
+        {
+          "author": "سیستم",
+          "date": "۱۴۰۴/۰۷/۱۰ - ۱۷:۵۰",
+          "text": "پرداخت موفق از طریق درگاه و تغییر وضعیت به «تأیید»."
+        }
+      ]
+    }
+  ],
+  "installments": [
+    {
+      "id": "in_s201_1",
+      "studentId": 201,
+      "dueDate": "۱۴۰۴/۰۶/۰۱",
+      "amount": 1250000,
+      "daysRemaining": 0,
+      "paymentStatus": "پرداخت شده",
+      "transactionId": "tr1",
+      "lastContactDate": "۱۴۰۴/۰۵/۲۸"
+    },
+    {
+      "id": "in_s201_2",
+      "studentId": 201,
+      "dueDate": "۱۴۰۴/۰۶/۱۵",
+      "amount": 1250000,
+      "daysRemaining": 0,
+      "paymentStatus": "پرداخت شده",
+      "transactionId": "tr2",
+      "lastContactDate": "۱۴۰۴/۰۶/۱۴"
+    },
+    {
+      "id": "in_s201_3",
+      "studentId": 201,
+      "dueDate": "۱۴۰۴/۰۶/۳۰",
+      "amount": 1250000,
+      "daysRemaining": -3,
+      "paymentStatus": "سررسید شده",
+      "transactionId": null,
+      "lastContactDate": "۱۴۰۴/۰۶/۲۸"
+    },
+    {
+      "id": "in_s201_4",
+      "studentId": 201,
+      "dueDate": "۱۴۰۴/۰۷/۱۵",
+      "amount": 1250000,
+      "daysRemaining": 13,
+      "paymentStatus": "درآینده",
+      "transactionId": null,
+      "lastContactDate": "۱۴۰۴/۰۶/۲۸"
+    },
+    {
+      "id": "in_s202_1",
+      "studentId": 202,
+      "dueDate": "۱۴۰۴/۰۶/۰۵",
+      "amount": 5000000,
+      "daysRemaining": 0,
+      "paymentStatus": "پرداخت شده",
+      "transactionId": "tr3",
+      "lastContactDate": "۱۴۰۴/۰۶/۰۱"
+    },
+    {
+      "id": "in7",
+      "studentId": 213,
+      "dueDate": "۱۴۰۴/۰۸/۱۰",
+      "amount": 2200000,
+      "daysRemaining": 0,
+      "paymentStatus": "پرداخت شده",
+      "lastContactDate": "۱۴۰۴/۰۸/۰۵"
+    },
+    {
+      "id": "in8",
+      "studentId": 216,
+      "dueDate": "۱۴۰۴/۱۲/۲۰",
+      "amount": 1000000,
+      "daysRemaining": -5,
+      "paymentStatus": "سررسید شده",
+      "lastContactDate": "۱۴۰۴/۱۲/۱۰"
+    },
+    {
+      "id": "in9",
+      "studentId": 218,
+      "dueDate": "۱۴۰۵/۰۱/۲۵",
+      "amount": 1200000,
+      "daysRemaining": 10,
+      "paymentStatus": "درآینده",
+      "lastContactDate": "۱۴۰۵/۰۱/۱۰"
+    },
+    {
+      "id": "in10",
+      "studentId": 220,
+      "dueDate": "۱۴۰۵/۰۴/۱۰",
+      "amount": 2000000,
+      "daysRemaining": 60,
+      "paymentStatus": "درآینده",
+      "lastContactDate": "۱۴۰۵/۰۲/۲۰"
+    }
+  ],
+  "discounts": [
+    {
+      "id": "d1",
+      "code": "RAYAN50",
+      "percentage": 50,
+      "createdAt": "۱۴۰۴/۰۵/۰۱",
+      "usageCount": 12,
+      "usageLimit": 100,
+      "expiresAt": "۱۴۰۴/۰۸/۰۱",
+      "status": "فعال"
+    },
+    {
+      "id": "d2",
+      "code": "FALL25",
+      "percentage": 25,
+      "createdAt": "۱۴۰۴/۰۶/۱۵",
+      "usageCount": 50,
+      "usageLimit": 50,
+      "expiresAt": "۱۴۰۴/۰۷/۱۵",
+      "status": "منقضی"
+    },
+    {
+      "id": "d3",
+      "code": "UNLIMITED10",
+      "percentage": 10,
+      "createdAt": "۱۴۰۴/۰۱/۱۰",
+      "usageCount": 253,
+      "usageLimit": null,
+      "expiresAt": null,
+      "status": "فعال"
+    }
+  ],
+  "groups": [
+    { "id": "g1", "name": "G-101", "termId": "t74", "apollonyarId": "ap1", "studentCount": 12 },
+    { "id": "g2", "name": "G-201", "termId": "t76", "apollonyarId": "ap3", "studentCount": 15 },
+    { "id": "g3", "name": "G-301", "termId": "t78", "apollonyarId": "ap2", "studentCount": 18 },
+    { "id": "g4", "name": "G-401", "termId": "t81", "apollonyarId": "ap4", "studentCount": 10 }
+  ]
+}
