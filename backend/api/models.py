@@ -1,9 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
-# === 0. مدیر سفارشی برای مدل User ===
-
-# برای حذف فیلد username، باید یک مدیر کاربر سفارشی بسازیم
+# === 0. UserManager برای مدل User ===
 class UserManager(BaseUserManager):
     def create_user(self, phone_number, password=None, **extra_fields):
         if not phone_number:
@@ -40,7 +38,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     sex = models.CharField(max_length=10, choices=SEX_CHOICES, blank=True, null=True, verbose_name="جنسیت")
     birthday = models.DateField(blank=True, null=True, verbose_name="تاریخ تولد")
     country = models.CharField(max_length=50, blank=True, null=True, verbose_name="کشور")
-    state = models.CharField(max_length=50, blank=True, null=True, verbose_name="استان")
+    state_province = models.CharField(max_length=50, blank=True, null=True, verbose_name="استان")
     city = models.CharField(max_length=50, blank=True, null=True, verbose_name="شهر")
     full_address = models.TextField(blank=True, null=True, verbose_name="آدرس کامل")
     postal_code = models.CharField(max_length=20, blank=True, null=True, verbose_name="کد پستی")
@@ -75,7 +73,6 @@ class Apollonyar(models.Model):
 
 class Course(models.Model):
     name = models.CharField(max_length=100, verbose_name="نام دوره")
-    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="قیمت")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="زمان به‌روزرسانی")
 
@@ -84,6 +81,7 @@ class Course(models.Model):
 
 class Term(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='terms', verbose_name="دوره")
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="قیمت")
     name = models.CharField(max_length=100, verbose_name="نام ترم")
     start_date = models.DateField(verbose_name="تاریخ شروع")
     end_date = models.DateField(verbose_name="تاریخ پایان")
@@ -93,9 +91,19 @@ class Term(models.Model):
     def __str__(self):
         return f"{self.course.name} - {self.name}"
 
+class Group(models.Model):
+    term = models.ForeignKey(Term, on_delete=models.CASCADE, related_name='groups', verbose_name="ترم")
+    title = models.CharField(max_length=100, verbose_name="عنوان گروه")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="زمان به‌روزرسانی")
+
+    def __str__(self):
+        return self.title
+
 class AssignmentDef(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='assignment_defs', verbose_name="دوره")
+    term = models.ForeignKey(Term, on_delete=models.CASCADE, related_name='assignment_defs', verbose_name="ترم")
     title = models.CharField(max_length=200, verbose_name="عنوان تکلیف")
+    deadline = models.DateTimeField(verbose_name="مهلت ارسال")
     is_required = models.BooleanField(default=True, verbose_name="آیا الزامی است؟")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="زمان به‌روزرسانی")
@@ -114,19 +122,11 @@ class AssignmentDefTemplate(models.Model):
     def __str__(self):
         return f"{self.assignment_def.title} - {self.title}"
 
-class TermAssignmentDeadline(models.Model):
-    term = models.ForeignKey(Term, on_delete=models.CASCADE, related_name='assignment_deadlines', verbose_name="ترم")
-    assignment_def = models.ForeignKey(AssignmentDef, on_delete=models.CASCADE, related_name='term_deadlines', verbose_name="تکلیف")
-    deadline = models.DateTimeField(verbose_name="مهلت ارسال")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="زمان به‌روزرسانی")
-
-    def __str__(self):
-        return f"ددلاین {self.assignment_def.title} برای {self.term.name}"
-
 class CallDef(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='call_defs', verbose_name="دوره")
+    term = models.ForeignKey(Term, on_delete=models.CASCADE, related_name='call_defs', verbose_name="ترم")
     title = models.CharField(max_length=200, verbose_name="موضوع تماس")
+    start_due_date = models.DateTimeField(verbose_name="تاریخ شروع موعد")
+    end_due_date = models.DateTimeField(verbose_name="تاریخ پایان موعد")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="زمان به‌روزرسانی")
     
@@ -134,13 +134,6 @@ class CallDef(models.Model):
         return self.title
 
 # === 3. پروفایل هنرجو و وضعیت‌ها ===
-
-class Group(models.Model):
-    title = models.CharField(max_length=100, verbose_name="عنوان گروه")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="زمان به‌روزرسانی")
-    def __str__(self):
-        return self.title
 
 class Profile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='profiles', verbose_name="کاربر هنرجو")
@@ -178,7 +171,7 @@ class MedalDef(models.Model):
 class Medal(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='medals', verbose_name="پروفایل")
     medal_def = models.ForeignKey(MedalDef, on_delete=models.CASCADE, related_name='awards', verbose_name="مدال")
-    giver = models.ForeignKey(Apollonyar, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="اعطا کننده")
+    giver_apollonyar = models.ForeignKey(Apollonyar, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="اعطا کننده")
     description = models.TextField(blank=True, null=True, verbose_name="توضیحات")
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name="زمان اعطا")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")
@@ -201,7 +194,7 @@ class DiscountCode(models.Model):
 
 class Transaction(models.Model):
     target_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transactions', verbose_name="کاربر هدف")
-    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="مبلغ")
+    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="مبلغ")
     TYPE_CHOICES = [('deposit', 'واریز'), ('withdrawal', 'برداشت')]
     type = models.CharField(max_length=20, choices=TYPE_CHOICES, verbose_name="نوع")
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name="زمان ثبت")
@@ -217,7 +210,7 @@ class Transaction(models.Model):
 
 class TransactionNote(models.Model):
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, related_name='notes', verbose_name="تراکنش")
-    author = models.ForeignKey(Apollonyar, on_delete=models.SET_NULL, null=True, verbose_name="نویسنده")
+    author_apollonyar = models.ForeignKey(Apollonyar, on_delete=models.SET_NULL, null=True, verbose_name="نویسنده")
     note = models.TextField(verbose_name="یادداشت")
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name="زمان")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")
@@ -247,7 +240,7 @@ class Assignment(models.Model):
 
 class AssignmentSubmission(models.Model):
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name='submissions', verbose_name="تکلیف")
-    apollonyar = models.ForeignKey(Apollonyar, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="ارزیاب")
+    assessor_apollonyar = models.ForeignKey(Apollonyar, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="ارزیاب")
     submission_timestamp = models.DateTimeField(auto_now_add=True, verbose_name="زمان ارسال")
     grade = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name="نمره")
     feedback = models.TextField(blank=True, null=True, verbose_name="بازخورد")
@@ -269,7 +262,7 @@ class Call(models.Model):
     caller = models.ForeignKey(Apollonyar, on_delete=models.SET_NULL, null=True, verbose_name="تماس گیرنده")
 
     TYPE_CHOICES = [('course', 'دوره'), ('installment', 'قسط'), ('cancellation', 'انصراف'), ('other', 'غیره')]
-    STATUS_CHOICES = [('pending', 'در انتظار'), ('not_answered', 'بی‌پاسخ'), ('successful', 'موفق')]
+    STATUS_CHOICES = [('pending', 'در انتظار'), ('not_answered', 'بی‌پاسخ'), ('successful', 'موفق'), ('lost', 'سوخته')]
     
     type = models.CharField(max_length=20, choices=TYPE_CHOICES, verbose_name="نوع تماس")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name="وضعیت")
@@ -280,7 +273,7 @@ class Call(models.Model):
 
 class Note(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='general_notes', verbose_name="پروفایل")
-    author = models.ForeignKey(Apollonyar, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="نویسنده")
+    author_apollonyar = models.ForeignKey(Apollonyar, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="نویسنده")
     note = models.TextField(verbose_name="یادداشت")
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name="زمان")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")
@@ -289,7 +282,7 @@ class Note(models.Model):
 class Log(models.Model):
     action = models.CharField(max_length=255, verbose_name="اقدام")
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name="زمان")
-    issuer = models.ForeignKey(Apollonyar, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="انجام دهنده")
+    issuer_apollonyar = models.ForeignKey(Apollonyar, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="انجام دهنده")
     description = models.TextField(blank=True, null=True, verbose_name="توضیحات")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="زمان به‌روزرسانی")
