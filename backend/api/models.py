@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.utils import timezone
+from datetime import timedelta
 
 # === 0. UserManager برای مدل User ===
 class UserManager(BaseUserManager):
@@ -286,3 +288,15 @@ class Log(models.Model):
     description = models.TextField(blank=True, null=True, verbose_name="توضیحات")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="زمان به‌روزرسانی")
+
+class OTPCode(models.Model):
+    phone_number = models.CharField(max_length=15, verbose_name="شماره تلفن")
+    code = models.CharField(max_length=6, verbose_name="کد تایید")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")
+
+    def is_expired(self):
+        # کدها را برای ۲ دقیقه معتبر در نظر می‌گیریم
+        return timezone.now() > self.created_at + timedelta(minutes=2)
+
+    def __str__(self):
+        return f"Code for {self.phone_number}"
