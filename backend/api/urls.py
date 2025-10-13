@@ -3,7 +3,8 @@ from django.contrib import admin
 from django.urls import path, include
 from .views import (
     UserRegistrationView, MyTokenObtainPairView, OTPRequestView, OTPVerifyView,
-    CourseViewSet, TermViewSet, ApollonyarViewSet, GroupViewSet, MedalDefViewSet
+    CourseViewSet, TermViewSet, ApollonyarViewSet, GroupViewSet, MedalDefViewSet,
+    DiscountCodeViewSet, AssignmentDefViewSet, CallDefViewSet, ProfileViewSet
 )
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
@@ -17,6 +18,10 @@ router.register(r'terms', TermViewSet, basename='term')
 router.register(r'apollonyars', ApollonyarViewSet, basename='apollonyar')
 router.register(r'groups', GroupViewSet, basename='group')
 router.register(r'medal-defs', MedalDefViewSet, basename='medaldef')
+router.register(r'discount-codes', DiscountCodeViewSet, basename='discountcode')
+router.register(r'assignment-defs', AssignmentDefViewSet, basename='assignmentdef')
+router.register(r'call-defs', CallDefViewSet, basename='calldef')
+router.register(r'profiles', ProfileViewSet, basename='profile')
 
 urlpatterns = [
     # URL های مربوط به احراز هویت

@@ -4,13 +4,21 @@ import random
 from rest_framework import generics, status, viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from rest_framework.decorators import action
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import (
     MyTokenObtainPairSerializer, OTPRequestSerializer, OTPVerifySerializer,
     UserRegistrationSerializer, CourseSerializer, TermSerializer,
-    ApollonyarSerializer, GroupSerializer, MedalDefSerializer)
-from .models import (User, OTPCode, Course, Term, Apollonyar, Group, MedalDef)
+    ApollonyarSerializer, GroupSerializer, MedalDefSerializer, DiscountCodeSerializer,
+    AssignmentDefSerializer, CallDefSerializer, ProfileSerializer,
+    AssignmentSerializer, CallSerializer, NoteSerializer
+    )
+from .models import (
+    User, OTPCode, Course, Term, Apollonyar, Group,
+    MedalDef, DiscountCode, AssignmentDef, CallDef, Profile,
+    Assignment, Call, Note
+    )
 
 class UserRegistrationView(generics.CreateAPIView):
     """
@@ -123,3 +131,76 @@ class MedalDefViewSet(viewsets.ModelViewSet):
     queryset = MedalDef.objects.all()
     serializer_class = MedalDefSerializer
     permission_classes = [permissions.IsAdminUser]
+
+class DiscountCodeViewSet(viewsets.ModelViewSet):
+    """API برای مدیریت کدهای تخفیف"""
+    queryset = DiscountCode.objects.all()
+    serializer_class = DiscountCodeSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+class AssignmentDefViewSet(viewsets.ModelViewSet):
+    """API برای مدیریت تعاریف تکالیف"""
+    queryset = AssignmentDef.objects.all()
+    serializer_class = AssignmentDefSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+class CallDefViewSet(viewsets.ModelViewSet):
+    """API برای مدیریت تعاریف تماس‌ها"""
+    queryset = CallDef.objects.all()
+    serializer_class = CallDefSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+class ProfileViewSet(viewsets.ModelViewSet):
+    """API برای مشاهده و مدیریت پروفایل هنرجویان"""
+    queryset = Profile.objects.select_related(
+        'user', 'term__course', 'group', 'apollonyar', 'sales_representative'
+    ).all()
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAdminUser] # فعلا فقط ادمین دسترسی دارد
+
+class ProfileViewSet(viewsets.ModelViewSet):
+    """API برای مشاهده و مدیریت پروفایل هنرجویان"""
+    queryset = Profile.objects.select_related(
+        'user', 'course', 'term', 'group', 'apollonyar', 'sales_representative'
+    ).all()
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    # === اکشن جدید برای دریافت تکالیف ===
+    @action(detail=True, methods=['get'])
+    def assignments(self, request, pk=None):
+        """
+        یک endpoint سفارشی برای دریافت لیست تکالیف یک پروفایل خاص.
+        این اکشن در آدرس /api/profiles/{id}/assignments/ در دسترس خواهد بود.
+        """
+        profile = self.get_object() # پروفایل مورد نظر را بر اساس id پیدا می‌کند
+        assignments = profile.assignments.all().order_by('deadline') # تمام تکالیف مرتبط با این پروفایل
+        serializer = AssignmentSerializer(assignments, many=True)
+        return Response(serializer.data)
+
+class ProfileViewSet(viewsets.ModelViewSet):
+    # ... (کدهای قبلی ViewSet شامل queryset, serializer_class, permission_classes و اکشن assignments) ...
+
+    # === اکشن جدید برای دریافت تماس‌ها ===
+    @action(detail=True, methods=['get'])
+    def calls(self, request, pk=None):
+        """
+        دریافت لیست تماس‌های یک پروفایل خاص.
+        آدرس: /api/profiles/{id}/calls/
+        """
+        profile = self.get_object()
+        calls = profile.calls.all().order_by('-call_timestamp') # تماس‌های مرتبط، مرتب‌شده بر اساس جدیدترین
+        serializer = CallSerializer(calls, many=True)
+        return Response(serializer.data)
+
+    # === اکشن جدید برای دریافت یادداشت‌ها ===
+    @action(detail=True, methods=['get'])
+    def notes(self, request, pk=None):
+        """
+        دریافت لیست یادداشت‌های عمومی یک پروفایل خاص.
+        آدرس: /api/profiles/{id}/notes/
+        """
+        profile = self.get_object()
+        notes = profile.general_notes.all().order_by('-timestamp') # یادداشت‌های مرتبط، مرتب‌شده بر اساس جدیدترین
+        serializer = NoteSerializer(notes, many=True)
+        return Response(serializer.data)
