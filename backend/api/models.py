@@ -156,7 +156,7 @@ class Profile(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="زمان به‌روزرسانی")
 
     def __str__(self):
-        return f"پروفایل {self.user.get_full_name()} برای دوره {self.course.name}"
+        return f"پروفایل {self.user.first_name} {self.user.last_name} برای دوره {self.course.name}"
 
 # === 4. مدال‌ها و تخفیف‌ها ===
 
