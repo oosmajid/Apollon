@@ -5,7 +5,7 @@ from .views import (
     UserRegistrationView, MyTokenObtainPairView, OTPRequestView, OTPVerifyView,
     CourseViewSet, TermViewSet, ApollonyarViewSet, GroupViewSet, MedalDefViewSet,
     DiscountCodeViewSet, AssignmentDefViewSet, CallDefViewSet, ProfileViewSet,
-    AssignmentViewSet, AssignmentSubmissionViewSet
+    AssignmentViewSet, AssignmentSubmissionViewSet, TransactionViewSet, InstallmentViewSet
 )
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
@@ -25,6 +25,8 @@ router.register(r'call-defs', CallDefViewSet, basename='calldef')
 router.register(r'profiles', ProfileViewSet, basename='profile')
 router.register(r'assignments', AssignmentViewSet, basename='assignment')
 router.register(r'submissions', AssignmentSubmissionViewSet, basename='submission')
+router.register(r'transactions', TransactionViewSet, basename='transaction')
+router.register(r'installments', InstallmentViewSet, basename='installment')
 
 
 urlpatterns = [

@@ -3,7 +3,8 @@
 from rest_framework import serializers
 from .models import (
     User, Course, Term, Apollonyar, Group, MedalDef, DiscountCode,
-    AssignmentDef, CallDef, Profile, AssignmentSubmissionFile, AssignmentSubmission, Assignment, Call, Note
+    AssignmentDef, CallDef, Profile, AssignmentSubmissionFile, AssignmentSubmission, Assignment,
+    Call, Note, Transaction, TransactionNote, Installment
     )
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -280,3 +281,30 @@ class AssignmentGradeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AssignmentSubmission
         fields = ['grade', 'feedback']
+
+class TransactionNoteSerializer(serializers.ModelSerializer):
+    """سریالایزر برای نمایش یادداشت‌های یک تراکنش."""
+    author_apollonyar = ApollonyarSerializerForProfile(read_only=True)
+
+    class Meta:
+        model = TransactionNote
+        fields = ['id', 'note', 'timestamp', 'author_apollonyar']
+
+class TransactionSerializer(serializers.ModelSerializer):
+    """سریالایزر کامل برای نمایش لیست و جزئیات تراکنش‌ها."""
+    target_user = UserSerializerForProfile(read_only=True)
+    notes = TransactionNoteSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Transaction
+        fields = '__all__'
+
+class InstallmentSerializer(serializers.ModelSerializer):
+    """سریالایزر برای نمایش لیست اقساط."""
+    # ما به اطلاعات پروفایل نیاز داریم، پس از سریالایزر پروفایل استفاده می‌کنیم
+    profile = ProfileSerializer(read_only=True)
+    transaction = TransactionSerializer(read_only=True)
+
+    class Meta:
+        model = Installment
+        fields = '__all__'

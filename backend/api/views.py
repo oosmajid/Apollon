@@ -14,12 +14,13 @@ from .serializers import (
     AssignmentDefSerializer, CallDefSerializer, ProfileSerializer,
     AssignmentSerializer, CallSerializer, NoteSerializer,
     CallCreateSerializer, NoteCreateSerializer,
-    AssignmentSubmissionCreateSerializer, AssignmentGradeSerializer
+    AssignmentSubmissionCreateSerializer, AssignmentGradeSerializer,
+    TransactionSerializer, InstallmentSerializer
     )
 from .models import (
     User, OTPCode, Course, Term, Apollonyar, Group,
     MedalDef, DiscountCode, AssignmentDef, CallDef, Profile,
-    Assignment, AssignmentSubmission
+    Assignment, AssignmentSubmission, Transaction, Installment
     )
 
 class UserRegistrationView(generics.CreateAPIView):
@@ -278,3 +279,38 @@ class AssignmentSubmissionViewSet(viewsets.GenericViewSet):
             )
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class TransactionViewSet(viewsets.ModelViewSet):
+    """API برای مدیریت تراکنش‌ها."""
+    queryset = Transaction.objects.select_related('target_user').prefetch_related('notes__author_apollonyar').all()
+    serializer_class = TransactionSerializer
+    permission_classes = [permissions.IsAdminUser] # فقط ادمین به تراکنش‌ها دسترسی دارد
+
+    @action(detail=True, methods=['post'])
+    def verify(self, request, pk=None):
+        """
+        یک endpoint سفارشی برای تایید یا رد کردن یک تراکنش.
+        آدرس: POST /api/transactions/{id}/verify/
+        بدنه درخواست: {"status": "valid"} یا {"status": "invalid"}
+        """
+        transaction = self.get_object()
+        new_status = request.data.get('status')
+
+        if new_status not in ['valid', 'invalid', 'pending']:
+            return Response({'error': 'وضعیت نامعتبر است.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        transaction.verification_status = new_status
+        transaction.verification_timestamp = timezone.now()
+        transaction.save()
+        
+        # یک لاگ یا یادداشت هم می‌توان اینجا اضافه کرد
+        
+        return Response(TransactionSerializer(transaction).data)
+
+class InstallmentViewSet(viewsets.ModelViewSet):
+    """API برای مدیریت اقساط."""
+    queryset = Installment.objects.select_related(
+        'profile__user', 'profile__course', 'transaction'
+    ).all()
+    serializer_class = InstallmentSerializer
+    permission_classes = [permissions.IsAdminUser]
