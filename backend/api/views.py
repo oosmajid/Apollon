@@ -56,8 +56,8 @@ class OTPRequestView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         phone_number = serializer.validated_data['phone_number']
 
-        # تولید کد ۶ رقمی تصادفی
-        otp_code = str(random.randint(100000, 999999))
+        # تولید کد ۴ رقمی تصادفی
+        otp_code = str(random.randint(1000, 9999))
         
         # حذف کدهای قبلی برای این شماره
         OTPCode.objects.filter(phone_number=phone_number).delete()

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onUnmounted } from 'vue' // onUnmounted را اضافه می‌کنیم
 import { useRouter } from 'vue-router'
+import api from '@/services/api'
 
 const router = useRouter()
 const loginMode = ref('otp')
@@ -10,6 +11,53 @@ const password = ref('')
 const otp = ref('')
 const isLoading = ref(false)
 const errorMessage = ref('')
+
+async function getOtp() {
+    errorMessage.value = ''
+    if (phoneNumber.value.length < 11) {
+        errorMessage.value = 'لطفاً شماره تلفن صحیح را وارد کنید.'
+        return
+    }
+    isLoading.value = true
+    try {
+        const response = await api.requestOtp(phoneNumber.value)
+        console.log('OTP Code for testing:', response.data.otp_code_for_test); // نمایش کد در کنسول مرورگر
+        step.value = 2
+    } catch (error) {
+        errorMessage.value = 'خطایی در ارسال کد رخ داد.'
+    } finally {
+        isLoading.value = false
+    }
+}
+
+async function handleLogin() {
+    isLoading.value = true
+    errorMessage.value = ''
+    try {
+        let response;
+        if (loginMode.value === 'otp') {
+            response = await api.verifyOtp(phoneNumber.value, otp.value)
+        } else { // loginMode === 'password'
+            response = await api.loginWithPassword({ 
+                phone_number: phoneNumber.value, 
+                password: password.value 
+            })
+        }
+
+        // ذخیره توکن‌ها در localStorage
+        localStorage.setItem('accessToken', response.data.access);
+        localStorage.setItem('refreshToken', response.data.refresh);
+        
+        // انتقال کاربر به صفحه اصلی
+        router.push({ name: 'all-students' })
+
+    } catch (error) {
+        errorMessage.value = 'اطلاعات وارد شده صحیح نیست. لطفاً مجدداً تلاش کنید.'
+        console.error('Login failed:', error.response?.data || error.message);
+    } finally {
+        isLoading.value = false
+    }
+}
 
 // --- جدید: منطق تایمر برای ارسال مجدد کد ---
 const countdown = ref(30)
@@ -41,43 +89,6 @@ onUnmounted(() => {
 })
 // --- پایان منطق تایمر ---
 
-function getOtp() {
-  errorMessage.value = ''
-  if (phoneNumber.value.length < 11) {
-    errorMessage.value = 'لطفاً شماره تلفن صحیح را وارد کنید.'
-    return
-  }
-  isLoading.value = true
-  console.log('Sending OTP to:', phoneNumber.value)
-
-  setTimeout(() => {
-    step.value = 2
-    isLoading.value = false
-    startTimer() // تایمر را برای اولین بار شروع کن
-  }, 1000)
-}
-
-function handleLogin() {
-  isLoading.value = true
-  errorMessage.value = ''
-
-  setTimeout(() => {
-    isLoading.value = false
-
-    const isOtpCorrect = loginMode.value === 'otp' && otp.value === '1234'
-    const isPasswordCorrect = loginMode.value === 'password' && password.value === '1234'
-
-    if (isOtpCorrect || isPasswordCorrect) {
-      if (timerId.value) clearInterval(timerId.value) // توقف تایمر در صورت لاگین موفق
-      router.push({ name: 'dashboard' })
-    } else {
-      errorMessage.value = 'اطلاعات وارد شده صحیح نیست. لطفاً مجدداً تلاش کنید.'
-      // در صورت ورود اطلاعات اشتباه، تایمر را متوقف کن تا دکمه فعال شود
-      if (timerId.value) clearInterval(timerId.value)
-      countdown.value = 0
-    }
-  }, 1500)
-}
 
 function editPhoneNumber() {
   step.value = 1
