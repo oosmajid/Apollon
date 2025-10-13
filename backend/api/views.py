@@ -12,12 +12,14 @@ from .serializers import (
     UserRegistrationSerializer, CourseSerializer, TermSerializer,
     ApollonyarSerializer, GroupSerializer, MedalDefSerializer, DiscountCodeSerializer,
     AssignmentDefSerializer, CallDefSerializer, ProfileSerializer,
-    AssignmentSerializer, CallSerializer, NoteSerializer
+    AssignmentSerializer, CallSerializer, NoteSerializer,
+    CallCreateSerializer, NoteCreateSerializer,
+    AssignmentSubmissionCreateSerializer, AssignmentGradeSerializer
     )
 from .models import (
     User, OTPCode, Course, Term, Apollonyar, Group,
     MedalDef, DiscountCode, AssignmentDef, CallDef, Profile,
-    Assignment, Call, Note
+    Assignment, AssignmentSubmission
     )
 
 class UserRegistrationView(generics.CreateAPIView):
@@ -153,18 +155,10 @@ class CallDefViewSet(viewsets.ModelViewSet):
 class ProfileViewSet(viewsets.ModelViewSet):
     """API برای مشاهده و مدیریت پروفایل هنرجویان"""
     queryset = Profile.objects.select_related(
-        'user', 'term__course', 'group', 'apollonyar', 'sales_representative'
-    ).all()
-    serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAdminUser] # فعلا فقط ادمین دسترسی دارد
-
-class ProfileViewSet(viewsets.ModelViewSet):
-    """API برای مشاهده و مدیریت پروفایل هنرجویان"""
-    queryset = Profile.objects.select_related(
         'user', 'course', 'term', 'group', 'apollonyar', 'sales_representative'
     ).all()
     serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [permissions.IsAdminUser] # فعلا فقط ادمین دسترسی دارد
 
     # === اکشن جدید برای دریافت تکالیف ===
     @action(detail=True, methods=['get'])
@@ -177,9 +171,6 @@ class ProfileViewSet(viewsets.ModelViewSet):
         assignments = profile.assignments.all().order_by('deadline') # تمام تکالیف مرتبط با این پروفایل
         serializer = AssignmentSerializer(assignments, many=True)
         return Response(serializer.data)
-
-class ProfileViewSet(viewsets.ModelViewSet):
-    # ... (کدهای قبلی ViewSet شامل queryset, serializer_class, permission_classes و اکشن assignments) ...
 
     # === اکشن جدید برای دریافت تماس‌ها ===
     @action(detail=True, methods=['get'])
@@ -204,3 +195,86 @@ class ProfileViewSet(viewsets.ModelViewSet):
         notes = profile.general_notes.all().order_by('-timestamp') # یادداشت‌های مرتبط، مرتب‌شده بر اساس جدیدترین
         serializer = NoteSerializer(notes, many=True)
         return Response(serializer.data)
+
+    # === اکشن جدید برای ثبت تماس ===
+    @action(detail=True, methods=['post'])
+    def log_call(self, request, pk=None):
+        """
+        ثبت یک تماس جدید برای یک پروفایل خاص.
+        آدرس: POST /api/profiles/{id}/log_call/
+        """
+        profile = self.get_object()
+        serializer = CallCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            # کاربر لاگین کرده (آپولون‌یار) را به عنوان تماس‌گیرنده ثبت می‌کنیم
+            # **نکته:** فرض کردیم آپولون‌یارها با مدل User جنگو لاگین می‌کنند
+            # اگر با مدل Apollonyar لاگین می‌کنند، این بخش نیاز به تغییر دارد
+            
+            # فعلا برای سادگی، caller را خالی می‌گذاریم
+            # در فاز بعدی سیستم دسترسی‌ها را کامل می‌کنیم
+            serializer.save(profile=profile) 
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # === اکشن جدید برای ثبت یادداشت ===
+    @action(detail=True, methods=['post'])
+    def add_note(self, request, pk=None):
+        """
+        ثبت یک یادداشت جدید برای یک پروفایل خاص.
+        آدرس: POST /api/profiles/{id}/add_note/
+        """
+        profile = self.get_object()
+        serializer = NoteCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            # مانند بالا، نویسنده یادداشت را بعدا بر اساس کاربر لاگین کرده تنظیم می‌کنیم
+            serializer.save(profile=profile)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class AssignmentViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API برای مشاهده تکالیف.
+    فقط خواندنی است چون تکالیف به صورت خودکار برای هنرجویان ساخته می‌شوند.
+    """
+    queryset = Assignment.objects.all()
+    serializer_class = AssignmentSerializer
+    # در فاز بعدی دسترسی‌ها را دقیق‌تر می‌کنیم (فقط هنرجوی مربوطه یا ادمین)
+    permission_classes = [permissions.IsAuthenticated]
+
+    # اکشن سفارشی برای ارسال یک تکلیف جدید
+    @action(detail=True, methods=['post'])
+    def submit(self, request, pk=None):
+        """
+        ایجاد یک Submission جدید برای یک تکلیف خاص.
+        آدرس: POST /api/assignments/{id}/submit/
+        """
+        assignment = self.get_object()
+        serializer = AssignmentSubmissionCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            # assignment را به صورت خودکار به داده‌های سریالایزر اضافه می‌کنیم
+            serializer.save(assignment=assignment)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AssignmentSubmissionViewSet(viewsets.GenericViewSet):
+    """API برای مدیریت ارسال‌های تکالیف (مانند نمره‌دهی)."""
+    queryset = AssignmentSubmission.objects.all()
+    # دسترسی فقط برای آپولون‌یارها و ادمین‌ها
+    permission_classes = [permissions.IsAdminUser] 
+
+    @action(detail=True, methods=['post'])
+    def grade(self, request, pk=None):
+        """
+        ثبت نمره و بازخورد برای یک Submission.
+        آدرس: POST /api/submissions/{id}/grade/
+        """
+        submission = self.get_object()
+        serializer = AssignmentGradeSerializer(instance=submission, data=request.data)
+        if serializer.is_valid():
+            serializer.save(
+                assessor_apollonyar=request.user.apollonyar, # فرض می‌کنیم آپولون‌یار لاگین کرده
+                assessment_timestamp=timezone.now()
+            )
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -239,3 +239,44 @@ class NoteSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'note', 'timestamp', 'author_apollonyar'
         ]
+
+class CallCreateSerializer(serializers.ModelSerializer):
+    """سریالایزر برای ثبت یک تماس جدید برای یک پروفایل."""
+    class Meta:
+        model = Call
+        # فیلدهایی که از فرانت‌اند دریافت می‌شوند
+        fields = ['call_def', 'type', 'status', 'description', 'call_timestamp']
+
+class NoteCreateSerializer(serializers.ModelSerializer):
+    """سریالایزر برای ثبت یک یادداشت جدید برای یک پروفایل."""
+    class Meta:
+        model = Note
+        fields = ['note'] # فقط متن یادداشت از ورودی گرفته می‌شود
+
+class AssignmentSubmissionFileCreateSerializer(serializers.ModelSerializer):
+    """سریالایزر برای ایجاد فایل‌های یک Submission جدید."""
+    class Meta:
+        model = AssignmentSubmissionFile
+        fields = ['template', 'file', 'description']
+
+class AssignmentSubmissionCreateSerializer(serializers.ModelSerializer):
+    """سریالایزر برای ایجاد یک Submission جدید به همراه فایل‌هایش."""
+    files = AssignmentSubmissionFileCreateSerializer(many=True)
+
+    class Meta:
+        model = AssignmentSubmission
+        fields = ['id', 'assignment', 'files', 'submission_timestamp']
+        read_only_fields = ['submission_timestamp']
+
+    def create(self, validated_data):
+        files_data = validated_data.pop('files')
+        submission = AssignmentSubmission.objects.create(**validated_data)
+        for file_data in files_data:
+            AssignmentSubmissionFile.objects.create(submission=submission, **file_data)
+        return submission
+
+class AssignmentGradeSerializer(serializers.ModelSerializer):
+    """سریالایزر برای ثبت نمره و بازخورد توسط آپولون‌یار."""
+    class Meta:
+        model = AssignmentSubmission
+        fields = ['grade', 'feedback']
