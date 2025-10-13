@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { useDataStore } from '@/stores/dataStore.js'
 import { useLayoutStore } from '@/stores/layout.js'
 import AppHeader from '@/components/AppHeader.vue'
 import MedalsGrid from '@/components/MedalsGrid.vue'
@@ -10,10 +9,23 @@ import BaseTable from '@/components/BaseTable.vue'
 import HeartRating from '@/components/HeartRating.vue'
 import AssignmentSubmission from '@/components/AssignmentSubmission.vue'
 import DetailedProgressBar from '@/components/DetailedProgressBar.vue'
+import api from '@/services/api'
 
-const dataStore = useDataStore()
 const layoutStore = useLayoutStore()
 const route = useRoute()
+
+// Reactive data for API responses
+const student = ref(null)
+const paymentHistory = ref([])
+const course = ref(null)
+const studentAssignments = ref([])
+const actionLogs = ref([])
+const earnedMedals = ref([])
+const progressData = ref(null)
+const loading = ref(true)
+const error = ref(null)
+
+const studentId = parseInt(route.params.id)
 
 // --- جدید: منطق نمایش Alert Bar ---
 const alertInfo = computed(() => {
@@ -34,18 +46,6 @@ const alertInfo = computed(() => {
   }
 })
 
-const studentId = parseInt(route.params.id)
-const student = computed(() => dataStore.getStudentById(studentId))
-
-const paymentHistory = computed(() => {
-  return dataStore.getPaymentsForStudent(studentId)
-})
-
-const course = computed(() => {
-  if (!student.value) return null
-  return dataStore.courses.find((c) => c.id === student.value.courseId)
-})
-
 // متغیرهای جدید برای مودال آپلود تکلیف
 const newSubmissionFiles = ref({}) // آبجکتی برای نگهداری فایل‌ها به ازای هر الگو
 const newSubmissionNotes = ref('') // متغیری برای یادداشت هنرجو
@@ -57,10 +57,10 @@ const medalAwardDescription = ref('')
 
 function handleMedalClick(medal) {
   selectedMedal.value = medal
-  const isEarned = student.value.earnedMedalIds.includes(medal.id)
+  const isEarned = earnedMedals.value.some(earnedMedal => earnedMedal.id === medal.id)
 
   if (isEarned) {
-    const awardLog = student.value.actionLogs.find(
+    const awardLog = actionLogs.value.find(
       (log) => log.action.includes(medal.name) && log.action.includes('اعطای مدال'),
     )
     medalAwardDescription.value = awardLog
@@ -96,14 +96,34 @@ function openAssignmentUploadModal(assignment) {
   isAssignmentUploadModalOpen.value = true
 }
 
-function handleUpload() {
-  console.log('Assignment Submitted with data:', {
-    assignmentId: selectedAssignment.value.id,
-    files: newSubmissionFiles.value,
-    notes: newSubmissionNotes.value,
-  })
-  alert('تکلیف شما با موفقیت ارسال شد. (شبیه‌سازی)')
-  isAssignmentUploadModalOpen.value = false
+async function handleUpload() {
+  try {
+    const formData = new FormData()
+    
+    // Add files to form data
+    Object.keys(newSubmissionFiles.value).forEach(templateId => {
+      const fileData = newSubmissionFiles.value[templateId]
+      if (fileData && fileData.file) {
+        formData.append(`file_${templateId}`, fileData.file)
+      }
+    })
+    
+    // Add notes
+    if (newSubmissionNotes.value) {
+      formData.append('notes', newSubmissionNotes.value)
+    }
+    
+    await api.submitStudentAssignment(selectedAssignment.value.id, formData)
+    
+    alert('تکلیف شما با موفقیت ارسال شد.')
+    isAssignmentUploadModalOpen.value = false
+    
+    // Refresh assignments data
+    await loadStudentAssignments()
+  } catch (error) {
+    console.error('Failed to submit assignment:', error)
+    alert('خطا در ارسال تکلیف. لطفاً دوباره تلاش کنید.')
+  }
 }
 
 function handleFileSelect(event, templateId) {
@@ -122,11 +142,6 @@ const progressPercent = computed(() => {
   return (student.value.watchTime / student.value.totalWatchTime) * 100
 })
 
-const studentAssignments = computed(() => {
-  if (!student.value) return []
-  return dataStore.getAssignmentsForStudentProfile(studentId, student.value.courseId)
-})
-
 const assignmentColumns = [
   { key: 'title', label: 'عنوان تکلیف' },
   { key: 'dueDate', label: 'مهلت ارسال' },
@@ -142,15 +157,93 @@ const logColumns = [
   { key: 'author', label: 'توسط' },
 ]
 
-onMounted(() => {
+// Data loading functions
+async function loadStudentProfile() {
+  try {
+    const response = await api.getStudentProfile(studentId)
+    student.value = response.data
+  } catch (error) {
+    console.error('Failed to load student profile:', error)
+    error.value = 'خطا در بارگذاری اطلاعات هنرجو'
+  }
+}
+
+async function loadStudentPayments() {
+  try {
+    const response = await api.getStudentPayments(studentId)
+    paymentHistory.value = response.data
+  } catch (error) {
+    console.error('Failed to load student payments:', error)
+  }
+}
+
+async function loadStudentAssignments() {
+  try {
+    const response = await api.getStudentAssignments(studentId)
+    studentAssignments.value = response.data
+  } catch (error) {
+    console.error('Failed to load student assignments:', error)
+  }
+}
+
+async function loadStudentActionLogs() {
+  try {
+    const response = await api.getStudentActionLogs(studentId)
+    actionLogs.value = response.data
+  } catch (error) {
+    console.error('Failed to load student action logs:', error)
+  }
+}
+
+async function loadStudentMedals() {
+  try {
+    const response = await api.getStudentMedals(studentId)
+    earnedMedals.value = response.data
+  } catch (error) {
+    console.error('Failed to load student medals:', error)
+  }
+}
+
+async function loadStudentProgress() {
+  try {
+    const response = await api.getStudentProgress(studentId)
+    progressData.value = response.data
+  } catch (error) {
+    console.error('Failed to load student progress:', error)
+  }
+}
+
+async function loadAllData() {
+  loading.value = true
+  error.value = null
+  
+  try {
+    await Promise.all([
+      loadStudentProfile(),
+      loadStudentPayments(),
+      loadStudentAssignments(),
+      loadStudentActionLogs(),
+      loadStudentMedals(),
+      loadStudentProgress()
+    ])
+  } catch (error) {
+    console.error('Failed to load student data:', error)
+    error.value = 'خطا در بارگذاری اطلاعات'
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(async () => {
   layoutStore.setPageTitle('آکادمی هنرهای دیجیتال رایان')
+  await loadAllData()
 })
 </script>
 
 <template>
   <div class="student-profile-page">
     <AppHeader />
-    <main class="profile-grid" v-if="student">
+    <main class="profile-grid" v-if="student && !loading">
       <aside class="profile-sidebar">
         <div class="profile-card card">
           <div class="profile-image">
@@ -276,7 +369,7 @@ onMounted(() => {
         </div>
 
         <MedalsGrid
-          :earned-medal-ids="student.earnedMedalIds || []"
+          :earned-medal-ids="earnedMedals.map(medal => medal.id)"
           @medal-click="handleMedalClick"
         />
 
@@ -290,9 +383,9 @@ onMounted(() => {
             >
           </div>
           <DetailedProgressBar
-            v-if="course"
-            :chapters="course.chapters || []"
-            :progress-data="student.chapterProgress || []"
+            v-if="progressData"
+            :chapters="progressData.chapters || []"
+            :progress-data="progressData.chapterProgress || []"
           />
         </div>
 
@@ -300,7 +393,7 @@ onMounted(() => {
           <div class="card-header"><h4>تکالیف</h4></div>
           <BaseTable
             :columns="assignmentColumns"
-            :data="studentAssignments || []"
+            :data="studentAssignments"
             :rows-per-page="10"
           >
             <template #cell-actions="{ item }">
@@ -345,11 +438,13 @@ onMounted(() => {
 
         <div class="card">
           <div class="card-header"><h4>لاگ اقدامات</h4></div>
-          <BaseTable :columns="logColumns" :data="student.actionLogs || []" :rows-per-page="5" />
+          <BaseTable :columns="logColumns" :data="actionLogs" :rows-per-page="5" />
         </div>
       </div>
     </main>
-    <div v-else class="loading-state"><h2>در حال بارگذاری اطلاعات هنرجو...</h2></div>
+    <div v-else-if="loading" class="loading-state"><h2>در حال بارگذاری اطلاعات هنرجو...</h2></div>
+    <div v-else-if="error" class="error-state"><h2>{{ error }}</h2></div>
+    <div v-else class="loading-state"><h2>هنرجو یافت نشد.</h2></div>
 
     <BaseModal :show="isMedalModalOpen" @close="isMedalModalOpen = false">
       <template #header><h2 v-if="selectedMedal">جزئیات مدال</h2></template>
@@ -357,7 +452,7 @@ onMounted(() => {
         <i :class="selectedMedal.icon" class="modal-medal-icon"></i>
         <h3>{{ selectedMedal.name }}</h3>
         <p class="medal-description">{{ selectedMedal.description }}</p>
-        <div v-if="student.earnedMedalIds.includes(selectedMedal.id)" class="award-reason">
+        <div v-if="earnedMedals.some(medal => medal.id === selectedMedal.id)" class="award-reason">
           <i class="fa-solid fa-quote-left"></i>
           <p>{{ medalAwardDescription }}</p>
         </div>
@@ -729,6 +824,14 @@ onMounted(() => {
   text-align: center;
   padding: 50px;
   color: var(--text-secondary);
+}
+.error-state {
+  text-align: center;
+  padding: 50px;
+  color: #b91c1c;
+  background-color: #fee2e2;
+  border-radius: var(--border-radius);
+  margin: 20px;
 }
 
 /* استایل‌های مودال آپلود */

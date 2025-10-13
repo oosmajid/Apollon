@@ -1,10 +1,20 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { useDataStore } from '@/stores/dataStore.js'
+import { ref, computed, onMounted } from 'vue'
 import BaseTable from '@/components/BaseTable.vue'
 import BaseModal from '@/components/BaseModal.vue'
+import api from '@/services/api'
 
-const dataStore = useDataStore()
+const groups = ref([])
+
+// Load groups data on mount
+onMounted(async () => {
+  try {
+    const response = await api.getGroups()
+    groups.value = response.data
+  } catch (error) {
+    console.error("Failed to fetch groups:", error)
+  }
+})
 
 // --- وضعیت مودال‌ها ---
 const showGroupModal = ref(false)
@@ -31,22 +41,38 @@ function openEditModal(group) {
 }
 
 // --- توابع ثبت و حذف ---
-function handleSubmit() {
-  if (isEditMode.value) {
-    console.log('Updating Group:', currentGroup.value)
-    // dataStore.updateGroup(currentGroup.value); // برای پیاده‌سازی در آینده
-  } else {
-    console.log('Adding new Group:', currentGroup.value)
-    // dataStore.addGroup(currentGroup.value); // برای پیاده‌سازی در آینده
+async function handleSubmit() {
+  try {
+    if (isEditMode.value) {
+      await api.updateGroup(currentGroup.value.id, currentGroup.value)
+      console.log('Group updated successfully')
+    } else {
+      await api.createGroup(currentGroup.value)
+      console.log('Group created successfully')
+    }
+    // Refresh groups data
+    const response = await api.getGroups()
+    groups.value = response.data
+    showGroupModal.value = false
+  } catch (error) {
+    console.error('Failed to save group:', error)
+    alert('خطا در ذخیره گروه. لطفاً دوباره تلاش کنید.')
   }
-  showGroupModal.value = false
 }
 
-function handleDelete() {
-  console.log('Deleting Group:', currentGroup.value.id)
-  // dataStore.deleteGroup(currentGroup.value.id); // برای پیاده‌سازی در آینده
-  showDeleteModal.value = false
-  showGroupModal.value = false
+async function handleDelete() {
+  try {
+    await api.deleteGroup(currentGroup.value.id)
+    console.log('Group deleted successfully')
+    // Refresh groups data
+    const response = await api.getGroups()
+    groups.value = response.data
+    showDeleteModal.value = false
+    showGroupModal.value = false
+  } catch (error) {
+    console.error('Failed to delete group:', error)
+    alert('خطا در حذف گروه. لطفاً دوباره تلاش کنید.')
+  }
 }
 
 const modalTitle = computed(() => {
@@ -70,7 +96,7 @@ const tableColumns = [
       </button>
     </div>
 
-    <BaseTable :columns="tableColumns" :data="dataStore.groups" :rows-per-page="10">
+    <BaseTable :columns="tableColumns" :data="groups" :rows-per-page="10">
       <template #cell-actions="{ item }">
         <button @click="openEditModal(item)" class="btn-sm">
           <i class="fa-solid fa-cogs"></i> ویرایش

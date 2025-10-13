@@ -1,16 +1,31 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { useDataStore } from '@/stores/dataStore.js'
+import { ref, computed, onMounted } from 'vue'
 import BaseTable from '@/components/BaseTable.vue'
 import BaseModal from '@/components/BaseModal.vue'
 import dayjs from 'dayjs'
 import jalali from 'dayjs-jalali'
+import api from '@/services/api'
 
 // فعال‌سازی پلاگین جلالی برای کار با تاریخ‌ها
 dayjs.extend(jalali)
 dayjs.locale('fa')
 
-const dataStore = useDataStore()
+const terms = ref([])
+const courses = ref([])
+
+// Load data on mount
+onMounted(async () => {
+  try {
+    const [termsRes, coursesRes] = await Promise.all([
+      api.getTerms(),
+      api.getCourses()
+    ])
+    terms.value = termsRes.data
+    courses.value = coursesRes.data
+  } catch (error) {
+    console.error("Failed to fetch data:", error)
+  }
+})
 
 // --- وضعیت مودال‌ها ---
 const showTermModal = ref(false)
@@ -21,7 +36,14 @@ const isEditMode = ref(false)
 const currentTerm = ref(null)
 
 // --- لیست دوره‌ها برای دراپ‌다운 ---
-const courses = computed(() => dataStore.courses)
+// Transform terms data for table display
+const termsForTable = computed(() => {
+  return terms.value.map(term => ({
+    ...term,
+    course: term.course?.name || '-',
+    studentsCount: term.students_count || 0,
+  }))
+})
 
 // --- توابع باز کردن مودال ---
 function openAddModal() {
@@ -74,22 +96,38 @@ function openEditModal(term) {
 }
 
 // --- توابع ثبت و حذف ---
-function handleSubmit() {
-  if (isEditMode.value) {
-    console.log('Updating term:', currentTerm.value)
-    // dataStore.updateTerm(currentTerm.value);
-  } else {
-    console.log('Adding new term:', currentTerm.value)
-    // dataStore.addTerm(currentTerm.value);
+async function handleSubmit() {
+  try {
+    if (isEditMode.value) {
+      await api.updateTerm(currentTerm.value.id, currentTerm.value)
+      console.log('Term updated successfully')
+    } else {
+      await api.createTerm(currentTerm.value)
+      console.log('Term created successfully')
+    }
+    // Refresh terms data
+    const response = await api.getTerms()
+    terms.value = response.data
+    showTermModal.value = false
+  } catch (error) {
+    console.error('Failed to save term:', error)
+    alert('خطا در ذخیره ترم. لطفاً دوباره تلاش کنید.')
   }
-  showTermModal.value = false
 }
 
-function handleDeleteTerm() {
-  console.log('Deleting term:', currentTerm.value.id)
-  // dataStore.deleteTerm(currentTerm.value.id);
-  showDeleteModal.value = false
-  showTermModal.value = false
+async function handleDeleteTerm() {
+  try {
+    await api.deleteTerm(currentTerm.value.id)
+    console.log('Term deleted successfully')
+    // Refresh terms data
+    const response = await api.getTerms()
+    terms.value = response.data
+    showDeleteModal.value = false
+    showTermModal.value = false
+  } catch (error) {
+    console.error('Failed to delete term:', error)
+    alert('خطا در حذف ترم. لطفاً دوباره تلاش کنید.')
+  }
 }
 
 const modalTitle = computed(() => {
@@ -116,7 +154,7 @@ const tableColumns = [
       </button>
     </div>
 
-    <BaseTable :columns="tableColumns" :data="dataStore.termsForTable" :rows-per-page="10">
+    <BaseTable :columns="tableColumns" :data="termsForTable" :rows-per-page="10">
       <template #cell-actions="{ item }">
         <button @click="openEditModal(item)" class="btn-sm">
           <i class="fa-solid fa-cogs"></i> ویرایش

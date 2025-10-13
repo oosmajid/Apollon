@@ -4,12 +4,21 @@ import BaseTable from '@/components/BaseTable.vue';
 import BaseModal from '@/components/BaseModal.vue';
 import AssignmentSubmission from '@/components/AssignmentSubmission.vue';
 import { useLayoutStore } from '@/stores/layout.js';
-import { useDataStore } from '@/stores/dataStore.js';
+import api from '@/services/api';
 
 const layoutStore = useLayoutStore();
-const dataStore = useDataStore();
-onMounted(() => { layoutStore.setPageTitle('تکالیف'); });
+const assignments = ref([]);
 
+onMounted(async () => {
+  layoutStore.setPageTitle('تکالیف');
+  try {
+    // <--- ۳. داده‌ها را از API جدید فراخوانی کنید
+    const response = await api.getAssignments(); // فرض می‌کنیم این تابع در api.js ساخته شود
+    assignments.value = response.data;
+  } catch (error) {
+    console.error("Failed to fetch assignments:", error);
+  }
+});
 const isModalOpen = ref(false);
 const selectedAssignment = ref(null);
 
@@ -24,9 +33,29 @@ function openEvaluationModal(assignment) {
   isModalOpen.value = true;
 }
 
-function submitEvaluation() {
-  console.log(`ارزیابی برای تکلیف ${selectedAssignment.value.id} ثبت شد.`);
-  isModalOpen.value = false;
+async function submitEvaluation() {
+  try {
+    // این باید از فرم ارزیابی گرفته شود - فعلاً placeholder
+    const gradeData = {
+      grade: 5, // این باید از فرم گرفته شود
+      feedback: 'ارزیابی انجام شد' // این باید از فرم گرفته شود
+    };
+    
+    // فرض می‌کنیم که آخرین submission را ارزیابی می‌کنیم
+    const latestSubmission = selectedAssignment.value.submissions?.[0];
+    if (latestSubmission) {
+      await api.gradeSubmission(latestSubmission.id, gradeData);
+      
+      // آپدیت کردن لیست تکالیف
+      const response = await api.getAssignments();
+      assignments.value = response.data;
+    }
+    
+    isModalOpen.value = false;
+  } catch (error) {
+    console.error("Failed to submit evaluation:", error);
+    alert('خطا در ثبت ارزیابی. لطفاً دوباره تلاش کنید.');
+  }
 }
 
 const tableColumns = [
@@ -43,7 +72,7 @@ const tableColumns = [
 
 <template>
   <div class="view-container">
-    <BaseTable :columns="tableColumns" :data="dataStore.assignmentsForTable" :rows-per-page="20">
+    <BaseTable :columns="tableColumns" :data="assignments" :rows-per-page="20">
       <template #cell-actions="{ item }">
         <div class="action-buttons">
           <button @click="openEvaluationModal(item)" class="btn-sm btn-icon-only" title="مشاهده تکلیف">

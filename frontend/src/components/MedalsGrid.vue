@@ -1,8 +1,8 @@
 <script setup>
-import { computed } from 'vue';
-import { useDataStore } from '@/stores/dataStore.js';
+import { computed, ref, onMounted } from 'vue';
+import api from '@/services/api';
 
-const dataStore = useDataStore();
+const medals = ref([])
 
 const props = defineProps({
   earnedMedalIds: {
@@ -14,9 +14,19 @@ const props = defineProps({
 // ۱. تعریف رویدادی که به والد ارسال می‌شود
 const emit = defineEmits(['medal-click']);
 
+// Load medals data on mount
+onMounted(async () => {
+  try {
+    const response = await api.getMedals()
+    medals.value = response.data
+  } catch (error) {
+    console.error("Failed to fetch medals:", error)
+  }
+})
+
 const sortedMedals = computed(() => {
   const earnedSet = new Set(props.earnedMedalIds);
-  return [...dataStore.medals].sort((a, b) => {
+  return [...medals.value].sort((a, b) => {
     const aEarned = earnedSet.has(a.id) ? 1 : 0;
     const bEarned = earnedSet.has(b.id) ? 1 : 0;
     return bEarned - aEarned;

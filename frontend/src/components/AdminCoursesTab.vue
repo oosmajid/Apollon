@@ -1,10 +1,20 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { useDataStore } from '@/stores/dataStore.js'
+import { ref, computed, onMounted } from 'vue'
 import BaseModal from '@/components/BaseModal.vue'
 import BaseTable from '@/components/BaseTable.vue'
+import api from '@/services/api'
 
-const dataStore = useDataStore()
+const courses = ref([])
+
+// Load courses data on mount
+onMounted(async () => {
+  try {
+    const response = await api.getCourses()
+    courses.value = response.data
+  } catch (error) {
+    console.error("Failed to fetch courses:", error)
+  }
+})
 
 // --- وضعیت مودال‌ها ---
 const showCourseModal = ref(false)
@@ -13,6 +23,17 @@ const isEditMode = ref(false)
 
 // --- داده‌های دوره فعلی ---
 const currentCourse = ref(null)
+
+// Transform courses data for table display
+const coursesForTable = computed(() => {
+  return courses.value.map(course => ({
+    ...course,
+    totalStudents: course.students_count || 0,
+    graduates: course.graduates_count || 0,
+    assignmentCount: course.assignments_count || 0,
+    callCount: course.calls_count || 0,
+  }))
+})
 
 // --- ستون‌های جدول اصلی ---
 const tableColumns = [
@@ -77,19 +98,38 @@ function removeCall(index) {
 }
 
 // --- توابع ثبت و حذف ---
-function handleSubmit() {
-  if (isEditMode.value) {
-    console.log('Updating course:', currentCourse.value)
-  } else {
-    console.log('Adding new course:', currentCourse.value)
+async function handleSubmit() {
+  try {
+    if (isEditMode.value) {
+      await api.updateCourse(currentCourse.value.id, currentCourse.value)
+      console.log('Course updated successfully')
+    } else {
+      await api.createCourse(currentCourse.value)
+      console.log('Course created successfully')
+    }
+    // Refresh courses data
+    const response = await api.getCourses()
+    courses.value = response.data
+    showCourseModal.value = false
+  } catch (error) {
+    console.error('Failed to save course:', error)
+    alert('خطا در ذخیره دوره. لطفاً دوباره تلاش کنید.')
   }
-  showCourseModal.value = false
 }
 
-function handleDeleteCourse() {
-  console.log('Deleting course:', currentCourse.value.id)
-  showDeleteModal.value = false
-  showCourseModal.value = false
+async function handleDeleteCourse() {
+  try {
+    await api.deleteCourse(currentCourse.value.id)
+    console.log('Course deleted successfully')
+    // Refresh courses data
+    const response = await api.getCourses()
+    courses.value = response.data
+    showDeleteModal.value = false
+    showCourseModal.value = false
+  } catch (error) {
+    console.error('Failed to delete course:', error)
+    alert('خطا در حذف دوره. لطفاً دوباره تلاش کنید.')
+  }
 }
 
 const modalTitle = computed(() => {
@@ -106,7 +146,7 @@ const modalTitle = computed(() => {
       </button>
     </div>
 
-    <BaseTable :columns="tableColumns" :data="dataStore.coursesForTable" :rows-per-page="10">
+    <BaseTable :columns="tableColumns" :data="coursesForTable" :rows-per-page="10">
       <template #cell-actions="{ item }">
         <button @click="openEditModal(item)" class="btn-sm">
           <i class="fa-solid fa-cogs"></i> ویرایش

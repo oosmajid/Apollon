@@ -1,10 +1,28 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { useDataStore } from '@/stores/dataStore.js'
+import { ref, computed, onMounted } from 'vue'
 import BaseTable from '@/components/BaseTable.vue'
 import BaseModal from '@/components/BaseModal.vue'
+import api from '@/services/api'
 
-const dataStore = useDataStore()
+const students = ref([])
+const apollonyars = ref([])
+const groups = ref([])
+
+// Load data on mount
+onMounted(async () => {
+  try {
+    const [studentsRes, apollonyarsRes, groupsRes] = await Promise.all([
+      api.getProfiles(),
+      api.getApollonyars(),
+      api.getGroups()
+    ])
+    students.value = studentsRes.data
+    apollonyars.value = apollonyarsRes.data
+    groups.value = groupsRes.data
+  } catch (error) {
+    console.error("Failed to fetch data:", error)
+  }
+})
 
 // --- وضعیت‌های داخلی ---
 const selectedStudentIds = ref([])
@@ -28,6 +46,20 @@ const tableColumns = [
 
 const hasSelection = computed(() => selectedStudentIds.value.length > 0)
 
+// Transform students data for table display
+const studentsWithDetails = computed(() => {
+  return students.value.map(profile => ({
+    ...profile,
+    id: profile.user?.id || profile.id,
+    name: `${profile.user?.first_name || ''} ${profile.user?.last_name || ''}`.trim() || profile.name,
+    phone: profile.user?.phone_number || profile.phone,
+    course: profile.term?.course?.name || '-',
+    term: profile.term?.name || '-',
+    apollonyar: profile.apollonyar?.first_name || '-',
+    group: profile.group?.name || '-',
+  }))
+})
+
 // --- توابع ---
 function openApollonyarModal() {
   selectedApollonyarId.value = null
@@ -46,40 +78,107 @@ function openDeleteModal(student) {
 }
 
 // جدید: اجرای حذف هنرجو
-function confirmDeleteStudent() {
-  if (studentToDelete.value) {
-    dataStore.removeStudent(studentToDelete.value.id)
+async function confirmDeleteStudent() {
+  try {
+    if (studentToDelete.value) {
+      await api.deleteProfile(studentToDelete.value.id)
+      console.log('Student deleted successfully')
+      // Refresh students data
+      const response = await api.getProfiles()
+      students.value = response.data
+    }
+    isDeleteModalOpen.value = false
+    studentToDelete.value = null
+  } catch (error) {
+    console.error('Failed to delete student:', error)
+    alert('خطا در حذف هنرجو. لطفاً دوباره تلاش کنید.')
   }
-  isDeleteModalOpen.value = false
-  studentToDelete.value = null
 }
 
-function assignApollonyar() {
-  // این تابع نیازی به تغییر ندارد
-  dataStore.assignApollonyarToStudents(selectedStudentIds.value, selectedApollonyarId.value)
-  selectedStudentIds.value = []
-  isApollonyarModalOpen.value = false
+async function assignApollonyar() {
+  try {
+    // Update each selected student's apollonyar
+    for (const studentId of selectedStudentIds.value) {
+      await api.changeStudentApollonyar(studentId, { 
+        apollonyarId: selectedApollonyarId.value 
+      })
+    }
+    
+    // Refresh students data
+    const response = await api.getProfiles()
+    students.value = response.data
+    
+    selectedStudentIds.value = []
+    isApollonyarModalOpen.value = false
+  } catch (error) {
+    console.error('Failed to assign apollonyar:', error)
+    alert('خطا در تخصیص آپولون‌یار. لطفاً دوباره تلاش کنید.')
+  }
 }
 
 // جدید: حذف تخصیص آپولون‌یار
-function unassignApollonyar() {
-  dataStore.assignApollonyarToStudents(selectedStudentIds.value, null)
-  selectedStudentIds.value = []
-  isApollonyarModalOpen.value = false
+async function unassignApollonyar() {
+  try {
+    for (const studentId of selectedStudentIds.value) {
+      await api.changeStudentApollonyar(studentId, { 
+        apollonyarId: null 
+      })
+    }
+    
+    // Refresh students data
+    const response = await api.getProfiles()
+    students.value = response.data
+    
+    selectedStudentIds.value = []
+    isApollonyarModalOpen.value = false
+  } catch (error) {
+    console.error('Failed to unassign apollonyar:', error)
+    alert('خطا در حذف آپولون‌یار. لطفاً دوباره تلاش کنید.')
+  }
 }
 
-function assignGroup() {
-  // این تابع نیازی به تغییر ندارد
-  dataStore.assignGroupToStudents(selectedStudentIds.value, selectedGroupId.value)
-  selectedStudentIds.value = []
-  isGroupModalOpen.value = false
+async function assignGroup() {
+  try {
+    // Update each selected student's group
+    for (const studentId of selectedStudentIds.value) {
+      // Assuming there's an API method for changing student group
+      // For now, we'll use a generic profile update
+      await api.updateStudentProfile(studentId, { 
+        groupId: selectedGroupId.value 
+      })
+    }
+    
+    // Refresh students data
+    const response = await api.getProfiles()
+    students.value = response.data
+    
+    selectedStudentIds.value = []
+    isGroupModalOpen.value = false
+  } catch (error) {
+    console.error('Failed to assign group:', error)
+    alert('خطا در تخصیص گروه. لطفاً دوباره تلاش کنید.')
+  }
 }
 
 // جدید: حذف تخصیص گروه
-function unassignGroup() {
-  dataStore.assignGroupToStudents(selectedStudentIds.value, null)
-  selectedStudentIds.value = []
-  isGroupModalOpen.value = false
+async function unassignGroup() {
+  try {
+    for (const studentId of selectedStudentIds.value) {
+      await api.updateStudentProfile(studentId, { 
+        groupId: null 
+      })
+    }
+    
+    // Refresh students data
+    const response = await api.getProfiles()
+    students.value = response.data
+    
+    selectedStudentIds.value = []
+    isGroupModalOpen.value = false
+  } catch (error) {
+    console.error('Failed to unassign group:', error)
+    alert('خطا در حذف گروه. لطفاً دوباره تلاش کنید.')
+  }
 }
 </script>
 
@@ -102,7 +201,7 @@ function unassignGroup() {
 
     <BaseTable
       :columns="tableColumns"
-      :data="dataStore.studentsWithDetails"
+      :data="studentsWithDetails"
       :rows-per-page="50"
       v-model="selectedStudentIds"
       selectable
@@ -134,7 +233,7 @@ function unassignGroup() {
           <label for="apollonyar-select">آپولون‌یار جدید را انتخاب کنید</label>
           <select id="apollonyar-select" v-model="selectedApollonyarId">
             <option :value="null" disabled>یک آپولون‌یار انتخاب کنید...</option>
-            <option v-for="ap in dataStore.apollonyars" :key="ap.id" :value="ap.id">
+            <option v-for="ap in apollonyars" :key="ap.id" :value="ap.id">
               {{ ap.name }}
             </option>
           </select>
@@ -159,7 +258,7 @@ function unassignGroup() {
           <label for="group-select">گروه جدید را انتخاب کنید</label>
           <select id="group-select" v-model="selectedGroupId">
             <option :value="null" disabled>یک گروه انتخاب کنید...</option>
-            <option v-for="group in dataStore.groups" :key="group.id" :value="group.id">
+            <option v-for="group in groups" :key="group.id" :value="group.id">
               {{ group.name }}
             </option>
           </select>

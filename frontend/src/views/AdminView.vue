@@ -9,10 +9,13 @@ import AdminMedalsTab from '@/components/AdminMedalsTab.vue'
 import AdminDiscountsTab from '@/components/AdminDiscountsTab.vue' // ۱. کامپوننت جدید را import کنید
 import { onMounted } from 'vue'
 import { useLayoutStore } from '@/stores/layout.js'
+
 const layoutStore = useLayoutStore()
+
 onMounted(() => {
   layoutStore.setPageTitle('پنل ادمین')
 })
+
 const activeTab = ref('courses')
 
 function setActiveTab(tabName) {

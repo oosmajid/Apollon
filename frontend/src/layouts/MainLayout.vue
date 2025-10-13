@@ -1,16 +1,10 @@
 <script setup>
-import { onMounted } from 'vue'
 import { RouterView } from 'vue-router'
 import AppSidebar from '../components/AppSidebar.vue'
 import AppHeader from '../components/AppHeader.vue'
-import { useDataStore } from '@/stores/dataStore.js'
 // استور را برای کلاس دینامیک nav-collapsed نیاز داریم
 import { useLayoutStore } from '@/stores/layout.js'
 const layoutStore = useLayoutStore()
-const dataStore = useDataStore()
-onMounted(() => {
-    dataStore.fetchInitialData()
-})
 </script>
 
 <template>

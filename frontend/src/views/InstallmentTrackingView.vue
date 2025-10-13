@@ -1,13 +1,20 @@
 <script setup>
-import { useDataStore } from '@/stores/dataStore.js';
 import BaseTable from '@/components/BaseTable.vue';
-import { onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useLayoutStore } from '@/stores/layout.js';
+import api from '@/services/api';
 
-const dataStore = useDataStore();
 const layoutStore = useLayoutStore();
-onMounted(() => {
+const installments = ref([]);
+onMounted(async () => {
   layoutStore.setPageTitle('پیگیری اقساط');
+  try {
+    // <--- ۳. داده‌ها را از API جدید فراخوانی کنید
+    const response = await api.getInstallments();
+    installments.value = response.data;
+  } catch (error) {
+    console.error("Failed to fetch installments:", error);
+  }
 });
 
 // ستون جدید "actions" اضافه شد
@@ -29,7 +36,7 @@ const tableColumns = [
 
 <template>
   <div class="view-container">
-    <BaseTable :columns="tableColumns" :data="dataStore.installmentsForTable" :rows-per-page="20">
+    <BaseTable :columns="tableColumns" :data="installments" :rows-per-page="20">
       <template #cell-daysRemaining="{ item }">
         <span :class="item.daysRemaining < 0 ? 'days-past' : 'days-future'">
           {{ Math.abs(item.daysRemaining) }}

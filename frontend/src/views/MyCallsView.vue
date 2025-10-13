@@ -1,15 +1,23 @@
 <script setup>
-import { useDataStore } from '@/stores/dataStore.js';
 import BaseTable from '@/components/BaseTable.vue';
 import HeartRating from '@/components/HeartRating.vue'; // کامپوننت قلب را import کنید
-import { onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useLayoutStore } from '@/stores/layout.js';
+import api from '@/services/api'
 
-const dataStore = useDataStore();
 const layoutStore = useLayoutStore();
-onMounted(() => {
-  layoutStore.setPageTitle('تماس‌های من');
+const calls = ref([])
+onMounted(async () => {
+    layoutStore.setPageTitle('تماس‌های من');
+    try {
+        // فرض می‌کنیم API برای تماس‌ها در آینده فیلتر بر اساس آپولون‌یار را پشتیبانی خواهد کرد
+        const response = await api.getCalls(); // یا یک API اختصاصی مانند getMyCalls
+        calls.value = response.data;
+    } catch (error) {
+        console.error("Failed to fetch calls:", error);
+    }
 });
+
 
 const tableColumns = [
   { key: 'actions', label: '', sortable: false, filterable: false },
@@ -30,7 +38,7 @@ const tableColumns = [
 
 <template>
   <div class="view-container">
-    <BaseTable :columns="tableColumns" :data="dataStore.callsForTable" :rows-per-page="20">
+    <BaseTable :columns="tableColumns" :data="calls" :rows-per-page="20">
       <template #cell-actions="{ item }">
         <RouterLink :to="{ name: 'student-profile', params: { id: item.studentId } }" class="btn-sm btn-icon-only" title="مشاهده پروفایل">
           <i class="fa-solid fa-user"></i>

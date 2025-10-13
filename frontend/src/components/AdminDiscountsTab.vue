@@ -1,11 +1,21 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
-import { useDataStore } from '@/stores/dataStore.js'
+import { ref, computed, watch, onMounted } from 'vue'
 import BaseTable from '@/components/BaseTable.vue'
 import BaseModal from '@/components/BaseModal.vue'
 import dayjs from 'dayjs'
+import api from '@/services/api'
 
-const dataStore = useDataStore()
+const discounts = ref([])
+
+// Load discounts data on mount
+onMounted(async () => {
+  try {
+    const response = await api.getDiscounts()
+    discounts.value = response.data
+  } catch (error) {
+    console.error("Failed to fetch discounts:", error)
+  }
+})
 
 // --- وضعیت مودال‌ها ---
 const showDiscountModal = ref(false)
@@ -70,26 +80,45 @@ function openEditModal(discount) {
   showDiscountModal.value = true
 }
 
-function handleSubmit() {
-  if (isUsageLimitUnlimited.value) {
-    currentDiscount.value.usageLimit = null
-  }
-  if (isExpiryUnlimited.value) {
-    currentDiscount.value.expiresAt = null
-  }
+async function handleSubmit() {
+  try {
+    if (isUsageLimitUnlimited.value) {
+      currentDiscount.value.usageLimit = null
+    }
+    if (isExpiryUnlimited.value) {
+      currentDiscount.value.expiresAt = null
+    }
 
-  if (isEditMode.value) {
-    console.log('Updating Discount:', currentDiscount.value)
-  } else {
-    console.log('Adding new Discount:', currentDiscount.value)
+    if (isEditMode.value) {
+      await api.updateDiscount(currentDiscount.value.id, currentDiscount.value)
+      console.log('Discount updated successfully')
+    } else {
+      await api.createDiscount(currentDiscount.value)
+      console.log('Discount created successfully')
+    }
+    // Refresh discounts data
+    const response = await api.getDiscounts()
+    discounts.value = response.data
+    showDiscountModal.value = false
+  } catch (error) {
+    console.error('Failed to save discount:', error)
+    alert('خطا در ذخیره کد تخفیف. لطفاً دوباره تلاش کنید.')
   }
-  showDiscountModal.value = false
 }
 
-function handleDelete() {
-  console.log('Deleting Discount:', currentDiscount.value.id)
-  showDeleteModal.value = false
-  showDiscountModal.value = false
+async function handleDelete() {
+  try {
+    await api.deleteDiscount(currentDiscount.value.id)
+    console.log('Discount deleted successfully')
+    // Refresh discounts data
+    const response = await api.getDiscounts()
+    discounts.value = response.data
+    showDeleteModal.value = false
+    showDiscountModal.value = false
+  } catch (error) {
+    console.error('Failed to delete discount:', error)
+    alert('خطا در حذف کد تخفیف. لطفاً دوباره تلاش کنید.')
+  }
 }
 
 const modalTitle = computed(() => (isEditMode.value ? 'ویرایش کد تخفیف' : 'افزودن کد تخفیف جدید'))
@@ -104,7 +133,7 @@ const modalTitle = computed(() => (isEditMode.value ? 'ویرایش کد تخف�
       </button>
     </div>
 
-    <BaseTable :columns="tableColumns" :data="dataStore.discounts" :rows-per-page="10">
+    <BaseTable :columns="tableColumns" :data="discounts" :rows-per-page="10">
       <template #cell-percentage="{ item }">{{ item.percentage }}٪</template>
       <template #cell-usageLimit="{ item }">{{ item.usageLimit ?? 'نامحدود' }}</template>
       <template #cell-expiresAt="{ item }">{{ item.expiresAt ?? 'ندارد' }}</template>

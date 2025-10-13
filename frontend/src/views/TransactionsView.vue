@@ -1,14 +1,22 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useDataStore } from '@/stores/dataStore.js';
+import api from '@/services/api';
 import BaseTable from '@/components/BaseTable.vue';
 import BaseModal from '@/components/BaseModal.vue';
 import { useLayoutStore } from '@/stores/layout.js';
 
-const dataStore = useDataStore();
 const layoutStore = useLayoutStore();
-onMounted(() => {
+const transactions = ref([]);
+
+onMounted(async () => {
   layoutStore.setPageTitle('تراکنش‌ها');
+  try {
+    // <--- ۳. داده‌ها را از API جدید فراخوانی کنید
+    const response = await api.getTransactions();
+    transactions.value = response.data;
+  } catch (error) {
+    console.error("Failed to fetch transactions:", error);
+  }
 });
 
 const isModalOpen = ref(false);
@@ -21,17 +29,40 @@ function openTransactionModal(transaction) {
   isModalOpen.value = true;
 }
 
-function handleTransactionStatus(status) {
-  dataStore.updateTransactionStatus(selectedTransaction.value.id, status);
-  isModalOpen.value = false;
+async function handleTransactionStatus(status) {
+  try {
+    await api.verifyTransaction(selectedTransaction.value.id, { status: status });
+    // آپدیت کردن لیست تراکنش‌ها
+    const response = await api.getTransactions();
+    transactions.value = response.data;
+    isModalOpen.value = false;
+  } catch (error) {
+    console.error("Failed to update transaction status:", error);
+  }
 }
 
-function submitNewNote() {
+async function submitNewNote() {
     if (newNote.value.trim()) {
-        dataStore.addTransactionNote(selectedTransaction.value.id, newNote.value.trim());
-        const updatedTransaction = dataStore.transactions.find(t => t.id === selectedTransaction.value.id);
-        selectedTransaction.value = JSON.parse(JSON.stringify(updatedTransaction));
-        newNote.value = '';
+        try {
+            await api.addTransactionNote(selectedTransaction.value.id, { 
+                text: newNote.value.trim(),
+                author: 'مدیر سیستم' // این باید از اطلاعات کاربر فعلی گرفته شود
+            });
+            
+            // آپدیت کردن لیست تراکنش‌ها برای دریافت یادداشت جدید
+            const response = await api.getTransactions();
+            transactions.value = response.data;
+            
+            // آپدیت کردن تراکنش انتخاب شده
+            const updatedTransaction = transactions.value.find(t => t.id === selectedTransaction.value.id);
+            if (updatedTransaction) {
+                selectedTransaction.value = JSON.parse(JSON.stringify(updatedTransaction));
+            }
+            
+            newNote.value = '';
+        } catch (error) {
+            console.error("Failed to add transaction note:", error);
+        }
     }
 }
 
@@ -48,7 +79,7 @@ const tableColumns = [
 
 <template>
   <div class="view-container">
-    <BaseTable :columns="tableColumns" :data="dataStore.transactions" :rows-per-page="15">
+    <BaseTable :columns="tableColumns" :data="transactions" :rows-per-page="15">
       <template #cell-type="{ item }">
         <span class="type-cell-icon-only">
           <i

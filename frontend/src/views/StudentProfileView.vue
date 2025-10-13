@@ -1,8 +1,8 @@
 <script setup>
-import { ref, computed, watchEffect } from 'vue'
+import { ref, computed, watchEffect, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useDataStore } from '@/stores/dataStore.js'
 import { useLayoutStore } from '@/stores/layout.js'
+import api from '@/services/api'
 import MedalsGrid from '@/components/MedalsGrid.vue'
 import BaseModal from '@/components/BaseModal.vue'
 import BaseTable from '@/components/BaseTable.vue'
@@ -16,12 +16,22 @@ dayjs.extend(jalali)
 dayjs.locale('fa')
 
 const layoutStore = useLayoutStore()
-const dataStore = useDataStore()
 const route = useRoute()
 const router = useRouter()
 
 const studentId = parseInt(route.params.id)
-const student = computed(() => dataStore.getStudentById(studentId))
+const student = ref(null)
+const studentAssignments = ref([])
+const studentCalls = ref([])
+const studentNotes = ref([])
+const studentPaymentHistory = ref([])
+const availableCourses = ref([])
+const availableTerms = ref([])
+const allTerms = ref([])
+const termsInSameCourse = ref([])
+const allApollonyars = ref([])
+const callTopics = ref([])
+
 
 // متغیر برای نگهداری ترم انتخاب‌شده فعلی
 const selectedTermId = ref(null)
@@ -33,31 +43,93 @@ const courseToRemove = ref(null)
 const isAddCourseModalOpen = ref(false)
 const newEnrollment = ref({ courseId: '', termId: '' })
 
-// لیست دوره‌هایی که هنرجو هنوز در آن‌ها ثبت‌نام نکرده
-const availableCourses = computed(() => {
-  const enrolledCourseIds = student.value.enrolledCourses.map((ec) => ec.courseId)
-  return dataStore.courses.filter((c) => !enrolledCourseIds.includes(c.id))
-})
 
-// لیست ترم‌های مربوط به دوره انتخاب شده در مودال
-const availableTerms = computed(() => {
-  if (!newEnrollment.value.courseId) return []
-  return dataStore.terms.filter((t) => t.courseId === newEnrollment.value.courseId)
-})
+onMounted(async () => {
+    // به محض باز شدن صفحه، تمام داده‌های مورد نیاز را از APIها فراخوانی می‌کنیم
+    try {
+        const profileRes = await api.getProfileDetails(studentId);
+        student.value = profileRes.data;
+        layoutStore.setPageTitle(`پروفایل: ${student.value.name}`);
+
+        const [assignmentsRes, callsRes, notesRes, paymentsRes, coursesRes, termsRes, apollonyarsRes] = await Promise.all([
+            api.getProfileAssignments(studentId),
+            api.getProfileCalls(studentId),
+            api.getProfileNotes(studentId),
+            api.getProfilePayments(studentId),
+            api.getCourses(),
+            api.getTerms(),
+            api.getApollonyars()
+        ]);
+        
+        studentAssignments.value = assignmentsRes.data;
+        studentCalls.value = callsRes.data;
+        studentNotes.value = notesRes.data;
+        studentPaymentHistory.value = paymentsRes.data;
+        
+        // Populate the ref arrays
+        const allCourses = coursesRes.data;
+        const allTermsData = termsRes.data;
+        const allApollonyarsData = apollonyarsRes.data;
+        
+        // Store all terms for later use
+        allTerms.value = allTermsData;
+        
+        // Calculate available courses (courses not enrolled in)
+        const enrolledCourseIds = student.value.enrolledCourses.map((ec) => ec.courseId);
+        availableCourses.value = allCourses.filter((c) => !enrolledCourseIds.includes(c.id));
+        
+        // Set all apollonyars
+        allApollonyars.value = allApollonyarsData;
+        
+        // Calculate terms in same course
+        if (student.value.courseId) {
+            termsInSameCourse.value = allTermsData.filter((term) => term.courseId === student.value.courseId);
+        }
+        
+        // Calculate call topics - will be updated when course changes
+        callTopics.value = ['تماس انصراف', 'تماس پیگیری قسط', 'سایر'];
+
+    } catch (error) {
+        console.error("Failed to load student profile data:", error);
+        // اگر پروفایل پیدا نشد، کاربر را به صفحه دیگری منتقل کنید
+    }
+});
+
+// These are now refs defined above
 
 function openAddCourseModal() {
   newEnrollment.value = { courseId: '', termId: '' }
+  availableTerms.value = []
   isAddCourseModalOpen.value = true
 }
 
-function handleAddCourse() {
+// Function to update available terms when course is selected
+function updateAvailableTerms() {
+  if (!newEnrollment.value.courseId) {
+    availableTerms.value = []
+    return
+  }
+  // Get terms from allTerms ref that was loaded from API
+  availableTerms.value = allTerms.value.filter((t) => t.courseId === newEnrollment.value.courseId)
+}
+
+async function handleAddCourse() {
   if (newEnrollment.value.courseId && newEnrollment.value.termId) {
-    dataStore.addCourseToStudent(
-      studentId,
-      newEnrollment.value.courseId,
-      newEnrollment.value.termId,
-    )
-    isAddCourseModalOpen.value = false
+    try {
+      await api.addCourseToStudent(studentId, {
+        courseId: newEnrollment.value.courseId,
+        termId: newEnrollment.value.termId
+      });
+      
+      // آپدیت کردن اطلاعات هنرجو
+      const profileRes = await api.getProfileDetails(studentId);
+      student.value = profileRes.data;
+      
+      isAddCourseModalOpen.value = false;
+    } catch (error) {
+      console.error("Failed to add course to student:", error);
+      alert('خطا در افزودن دوره. لطفاً دوباره تلاش کنید.');
+    }
   } else {
     alert('لطفاً هم دوره و هم ترم را انتخاب کنید.')
   }
@@ -72,27 +144,33 @@ function openDeleteCourseModal(enrolledCourse) {
   isDeleteCourseModalOpen.value = true
 }
 
-function confirmRemoveCourse() {
+async function confirmRemoveCourse() {
   if (!courseToRemove.value) return
 
-  dataStore.removeCourseFromStudent(studentId, courseToRemove.value.courseId)
+  try {
+    await api.removeCourseFromStudent(studentId, courseToRemove.value.enrollmentId || courseToRemove.value.courseId);
+    
+    // آپدیت کردن اطلاعات هنرجو
+    const profileRes = await api.getProfileDetails(studentId);
+    student.value = profileRes.data;
 
-  // اگر دوره حذف شده، دوره فعال بود، اولین دوره دیگر را فعال کن
-  if (selectedTermId.value === courseToRemove.value.termId) {
-    const remainingCourses = student.value.enrolledCourses.filter(
-      (c) => c.courseId !== courseToRemove.value.courseId,
-    )
-    selectedTermId.value = remainingCourses.length > 0 ? remainingCourses[0].termId : null
+    // اگر دوره حذف شده، دوره فعال بود، اولین دوره دیگر را فعال کن
+    if (selectedTermId.value === courseToRemove.value.termId) {
+      const remainingCourses = student.value.enrolledCourses.filter(
+        (c) => c.courseId !== courseToRemove.value.courseId,
+      )
+      selectedTermId.value = remainingCourses.length > 0 ? remainingCourses[0].termId : null
+    }
+
+    isDeleteCourseModalOpen.value = false
+    courseToRemove.value = null
+  } catch (error) {
+    console.error("Failed to remove course from student:", error);
+    alert('خطا در حذف دوره. لطفاً دوباره تلاش کنید.');
   }
-
-  isDeleteCourseModalOpen.value = false
-  courseToRemove.value = null
 }
 
 // --- منطق بخش پرداخت‌ها و ویرایش اقساط ---
-const paymentHistory = computed(() => {
-  return dataStore.getPaymentsForStudent(studentId)
-})
 const isEditInstallmentsModalOpen = ref(false)
 const editableInstallments = ref([])
 const validationError = ref('')
@@ -100,15 +178,15 @@ const validationError = ref('')
 const editableTotalCourseFee = ref(0)
 
 const totalPaid = computed(() => {
-  return dataStore.installments
-    .filter((i) => i.studentId === studentId && i.paymentStatus === 'پرداخت شده')
+  return studentPaymentHistory.value
+    .filter((i) => i.paymentStatus === 'پرداخت شده')
     .reduce((sum, i) => sum + (Number(String(i.amount).replace(/,/g, '')) || 0), 0)
 })
 
 function getReceiptUrl(transactionId) {
   if (!transactionId) return '#'
-  const transaction = dataStore.transactions.find((t) => t.id === transactionId)
-  return transaction ? transaction.receiptImageUrl : '#'
+  // This should be handled by the backend - for now return a placeholder
+  return `#transaction-${transactionId}`
 }
 
 const totalInstallmentsAmount = computed(() => {
@@ -136,7 +214,7 @@ function openEditInstallmentsModal() {
   editableTotalCourseFee.value = student.value.totalCourseFee || 0
 
   editableInstallments.value = JSON.parse(
-    JSON.stringify(dataStore.installments.filter((i) => i.studentId === studentId)),
+    JSON.stringify(studentPaymentHistory.value),
   ).map((i) => {
     // ۱. تبدیل اعداد فارسی در تاریخ به انگلیسی
     const persianMap = {
@@ -195,25 +273,43 @@ function removeInstallment(index) {
 
 // src/views/StudentProfileView.vue
 
-function saveInstallments() {
+async function saveInstallments() {
   const totalCourseFee = editableTotalCourseFee.value
   if (totalInstallmentsAmount.value !== totalCourseFee) {
     validationError.value = `مجموع مبلغ اقساط (${totalInstallmentsAmount.value.toLocaleString('fa-IR')}) باید با کل مبلغ قابل پرداخت (${totalCourseFee.toLocaleString('fa-IR')}) برابر باشد.`
     return
   }
 
-  // تبدیل تاریخ میلادی به شمسی قبل از ذخیره
-  const finalInstallments = editableInstallments.value.map((i) => {
-    if (i.dueDate && i.dueDate.includes('-')) {
-      // <<< این خط مشکل را به طور کامل حل می‌کند >>>
-      // ابتدا تاریخ را به تقویم جلالی تبدیل کرده و سپس فرمت می‌کنیم
-      i.dueDate = dayjs(i.dueDate).calendar('jalali').format('YYYY/MM/DD')
-    }
-    return i
-  })
+  try {
+    // تبدیل تاریخ میلادی به شمسی قبل از ذخیره
+    const finalInstallments = editableInstallments.value.map((i) => {
+      if (i.dueDate && i.dueDate.includes('-')) {
+        // <<< این خط مشکل را به طور کامل حل می‌کند >>>
+        // ابتدا تاریخ را به تقویم جلالی تبدیل کرده و سپس فرمت می‌کنیم
+        i.dueDate = dayjs(i.dueDate).calendar('jalali').format('YYYY/MM/DD')
+      }
+      return i
+    })
 
-  dataStore.updateStudentInstallments(studentId, finalInstallments, editableTotalCourseFee.value)
-  isEditInstallmentsModalOpen.value = false
+    await api.updateStudentInstallments(studentId, {
+      installments: finalInstallments,
+      totalCourseFee: editableTotalCourseFee.value
+    });
+
+    // آپدیت کردن اطلاعات هنرجو و اقساط
+    const [profileRes, paymentsRes] = await Promise.all([
+      api.getProfileDetails(studentId),
+      api.getProfilePayments(studentId)
+    ]);
+    
+    student.value = profileRes.data;
+    studentPaymentHistory.value = paymentsRes.data;
+    
+    isEditInstallmentsModalOpen.value = false;
+  } catch (error) {
+    console.error("Failed to update installments:", error);
+    alert('خطا در به‌روزرسانی اقساط. لطفاً دوباره تلاش کنید.');
+  }
 }
 // --- پایان منطق جدید ---
 
@@ -226,43 +322,83 @@ function handleMedalClick(medal) {
   isAwardingMedal.value = !student.value.earnedMedalIds.includes(medal.id)
   isMedalModalOpen.value = true
 }
-function submitMedalAction() {
-  if (isAwardingMedal.value) {
-    dataStore.addMedalToStudent(studentId, selectedMedal.value.id)
-  } else {
-    dataStore.removeMedalFromStudent(studentId, selectedMedal.value.id)
+async function submitMedalAction() {
+  try {
+    if (isAwardingMedal.value) {
+      await api.addMedalToStudent(studentId, { medalId: selectedMedal.value.id });
+    } else {
+      await api.removeMedalFromStudent(studentId, selectedMedal.value.id);
+    }
+    
+    // آپدیت کردن اطلاعات هنرجو
+    const profileRes = await api.getProfileDetails(studentId);
+    student.value = profileRes.data;
+    
+    isMedalModalOpen.value = false
+    selectedMedal.value = null
+  } catch (error) {
+    console.error("Failed to update student medal:", error);
+    alert('خطا در به‌روزرسانی مدال. لطفاً دوباره تلاش کنید.');
   }
-  isMedalModalOpen.value = false
-  selectedMedal.value = null
 }
 
 // --- Change Term Modal ---
 const isChangeTermModalOpen = ref(false)
 const previousTermChangesCount = ref(0)
-const termsInSameCourse = computed(() => {
-  if (!student.value || !student.value.courseId) return []
-  return dataStore.terms.filter((term) => term.courseId === student.value.courseId)
-})
+// termsInSameCourse is now a ref defined above
 function openChangeTermModal() {
   previousTermChangesCount.value = student.value.actionLogs.filter(
     (log) => log.action === 'تغییر ترم',
   ).length
   isChangeTermModalOpen.value = true
 }
-function submitChangeTerm() {
-  console.log('Term Changed!')
-  isChangeTermModalOpen.value = false
+async function submitChangeTerm() {
+  try {
+    // این باید از فرم مودال گرفته شود
+    const newTermId = document.getElementById('term-select')?.value;
+    if (newTermId) {
+      await api.changeStudentTerm(studentId, { 
+        termId: newTermId,
+        reason: document.getElementById('change-term-notes')?.value || ''
+      });
+      
+      // آپدیت کردن اطلاعات هنرجو
+      const profileRes = await api.getProfileDetails(studentId);
+      student.value = profileRes.data;
+    }
+    
+    isChangeTermModalOpen.value = false;
+  } catch (error) {
+    console.error("Failed to change student term:", error);
+    alert('خطا در تغییر ترم. لطفاً دوباره تلاش کنید.');
+  }
 }
 
 // --- Edit Apollonyar Modal ---
 const isEditApollonyarModalOpen = ref(false)
-const allApollonyars = computed(() => dataStore.apollonyars)
+// allApollonyars is now a ref defined above
 function openEditApollonyarModal() {
   isEditApollonyarModalOpen.value = true
 }
-function submitApollonyarChange() {
-  console.log('Apollonyar Changed!')
-  isEditApollonyarModalOpen.value = false
+async function submitApollonyarChange() {
+  try {
+    const newApollonyarId = document.getElementById('apollonyar-select')?.value;
+    if (newApollonyarId) {
+      await api.changeStudentApollonyar(studentId, { 
+        apollonyarId: newApollonyarId,
+        reason: document.getElementById('apollonyar-notes')?.value || ''
+      });
+      
+      // آپدیت کردن اطلاعات هنرجو
+      const profileRes = await api.getProfileDetails(studentId);
+      student.value = profileRes.data;
+    }
+    
+    isEditApollonyarModalOpen.value = false;
+  } catch (error) {
+    console.error("Failed to change student apollonyar:", error);
+    alert('خطا در تغییر آپولون‌یار. لطفاً دوباره تلاش کنید.');
+  }
 }
 
 // --- Edit Student Type Modal ---
@@ -272,9 +408,22 @@ function openEditTypeModal() {
   selectedType.value = student.value.studentType
   isEditTypeModalOpen.value = true
 }
-function submitTypeChange() {
-  console.log('Type Changed!')
-  isEditTypeModalOpen.value = false
+async function submitTypeChange() {
+  try {
+    await api.changeStudentType(studentId, { 
+      studentType: selectedType.value,
+      reason: document.getElementById('type-notes')?.value || ''
+    });
+    
+    // آپدیت کردن اطلاعات هنرجو
+    const profileRes = await api.getProfileDetails(studentId);
+    student.value = profileRes.data;
+    
+    isEditTypeModalOpen.value = false;
+  } catch (error) {
+    console.error("Failed to change student type:", error);
+    alert('خطا در تغییر نوع هنرجو. لطفاً دوباره تلاش کنید.');
+  }
 }
 
 // --- Edit Student Status Modal ---
@@ -284,9 +433,22 @@ function openEditStatusModal() {
   selectedStatus.value = student.value.status
   isEditStatusModalOpen.value = true
 }
-function submitStatusChange() {
-  console.log('Status Changed!')
-  isEditStatusModalOpen.value = false
+async function submitStatusChange() {
+  try {
+    await api.changeStudentStatus(studentId, { 
+      status: selectedStatus.value,
+      reason: document.getElementById('status-notes')?.value || ''
+    });
+    
+    // آپدیت کردن اطلاعات هنرجو
+    const profileRes = await api.getProfileDetails(studentId);
+    student.value = profileRes.data;
+    
+    isEditStatusModalOpen.value = false;
+  } catch (error) {
+    console.error("Failed to change student status:", error);
+    alert('خطا در تغییر وضعیت هنرجو. لطفاً دوباره تلاش کنید.');
+  }
 }
 
 // --- Edit Profile Modal ---
@@ -299,10 +461,19 @@ function openEditProfileModal() {
   isEditProfileModalOpen.value = true
 }
 
-function submitProfileEdit() {
-  // تابع جدیدی که در استور ساختیم را فراخوانی می‌کنیم
-  dataStore.updateStudentProfile(studentId, editableProfile.value)
-  isEditProfileModalOpen.value = false
+async function submitProfileEdit() {
+  try {
+    await api.updateStudentProfile(studentId, editableProfile.value);
+    
+    // آپدیت کردن اطلاعات هنرجو
+    const profileRes = await api.getProfileDetails(studentId);
+    student.value = profileRes.data;
+    
+    isEditProfileModalOpen.value = false;
+  } catch (error) {
+    console.error("Failed to update student profile:", error);
+    alert('خطا در به‌روزرسانی پروفایل. لطفاً دوباره تلاش کنید.');
+  }
 }
 
 // --- Edit Assignment Due Date Modal ---
@@ -341,26 +512,45 @@ function openEditDueDateModal(assignment) {
   }
   isEditDueDateModalOpen.value = true
 }
-function submitDueDateChange() {
-  console.log(`Due Date Changed to: ${newDueDate.value}`)
-  isEditDueDateModalOpen.value = false
+async function submitDueDateChange() {
+  try {
+    await api.updateAssignmentDueDate(selectedAssignmentForDueDate.value.id, { 
+      dueDate: newDueDate.value,
+      reason: document.getElementById('due-date-notes')?.value || ''
+    });
+    
+    // آپدیت کردن تکالیف
+    const assignmentsRes = await api.getProfileAssignments(studentId);
+    studentAssignments.value = assignmentsRes.data;
+    
+    isEditDueDateModalOpen.value = false;
+  } catch (error) {
+    console.error("Failed to update assignment due date:", error);
+    alert('خطا در به‌روزرسانی مهلت تکلیف. لطفاً دوباره تلاش کنید.');
+  }
 }
 
 // --- Log Call Modal ---
 const showLogCallModal = ref(false)
 const newCallData = ref({ topic: '', description: '', isUnanswered: false })
-const callTopics = computed(() => {
-  if (!course.value || !course.value.callsDef) return []
-  const courseCalls = course.value.callsDef.map((c) => c.topic)
-  return [...courseCalls, 'تماس انصراف', 'تماس پیگیری قسط', 'سایر']
-})
+// callTopics is now a ref defined above
 function openLogCallModal() {
   newCallData.value = { topic: callTopics.value[0] || '', description: '', isUnanswered: false }
   showLogCallModal.value = true
 }
-function submitLogCall() {
-  console.log('New Call Logged:', newCallData.value)
-  showLogCallModal.value = false
+async function submitLogCall() {
+  try {
+    await api.logCallForProfile(studentId, newCallData.value);
+    
+    // آپدیت کردن تماس‌ها
+    const callsRes = await api.getProfileCalls(studentId);
+    studentCalls.value = callsRes.data;
+    
+    showLogCallModal.value = false;
+  } catch (error) {
+    console.error("Failed to log call:", error);
+    alert('خطا در ثبت تماس. لطفاً دوباره تلاش کنید.');
+  }
 }
 
 // --- Details Modal for Calls & Logs ---
@@ -381,12 +571,22 @@ function openDeleteNoteModal(note) {
   noteToDelete.value = note
   isDeleteNoteModalOpen.value = true
 }
-function confirmDeleteNote() {
+async function confirmDeleteNote() {
   if (noteToDelete.value) {
-    dataStore.removeNoteFromStudent(studentId, noteToDelete.value.id)
+    try {
+      await api.removeNoteFromStudent(studentId, noteToDelete.value.id);
+      
+      // آپدیت کردن یادداشت‌ها
+      const notesRes = await api.getProfileNotes(studentId);
+      studentNotes.value = notesRes.data;
+      
+      isDeleteNoteModalOpen.value = false;
+      noteToDelete.value = null;
+    } catch (error) {
+      console.error("Failed to delete note:", error);
+      alert('خطا در حذف یادداشت. لطفاً دوباره تلاش کنید.');
+    }
   }
-  isDeleteNoteModalOpen.value = false
-  noteToDelete.value = null
 }
 
 // --- Add Note Modal ---
@@ -396,27 +596,33 @@ function openAddNoteModal() {
   newNoteText.value = ''
   isAddNoteModalOpen.value = true
 }
-function submitNewNote() {
-  dataStore.addNoteToStudent(studentId, newNoteText.value)
-  isAddNoteModalOpen.value = false
+async function submitNewNote() {
+  try {
+    await api.addNoteToStudent(studentId, { 
+      text: newNoteText.value,
+      author: 'مدیر سیستم' // این باید از اطلاعات کاربر فعلی گرفته شود
+    });
+    
+    // آپدیت کردن یادداشت‌ها
+    const notesRes = await api.getProfileNotes(studentId);
+    studentNotes.value = notesRes.data;
+    
+    isAddNoteModalOpen.value = false;
+  } catch (error) {
+    console.error("Failed to add note:", error);
+    alert('خطا در افزودن یادداشت. لطفاً دوباره تلاش کنید.');
+  }
 }
 
 // --- Other computed properties and functions ---
-const studentCalls = computed(() => {
-  if (!student.value || !course.value) return []
-  return dataStore.getCallsForStudentProfile(studentId, course.value.id)
-})
 const course = computed(() => {
   if (!student.value || !selectedTermId.value) return null
   const selectedEnrollment = student.value.enrolledCourses.find(
     (e) => e.termId === selectedTermId.value,
   )
   if (!selectedEnrollment) return null
-  return dataStore.courses.find((c) => c.id === selectedEnrollment.courseId)
-})
-const studentAssignments = computed(() => {
-  if (!student.value || !course.value) return []
-  return dataStore.getAssignmentsForStudentProfile(studentId, course.value.id)
+  // This should be loaded from API - for now return null
+  return null
 })
 watchEffect(() => {
   if (student.value) {
@@ -524,8 +730,8 @@ const noteColumns = [
               ویرایش اقساط
             </button>
           </div>
-          <ul v-if="paymentHistory.length" class="payment-list">
-            <li v-for="payment in paymentHistory" :key="payment.id" class="payment-item">
+          <ul v-if="studentPaymentHistory.length" class="payment-list">
+            <li v-for="payment in studentPaymentHistory" :key="payment.id" class="payment-item">
               <div class="payment-info">
                 <i class="fa-solid fa-wallet payment-icon" :class="payment.type"></i>
                 <div>
@@ -554,7 +760,7 @@ const noteColumns = [
             </button>
           </div>
 
-          <ul v-if="student.enrolledCourses && student.enrolledCourses.length" class="courses-list">
+          <ul v-if="student.enrolledCourses.length" class="courses-list">
             <li
               v-for="enrolledCourse in student.enrolledCourses"
               :key="enrolledCourse.courseId"
@@ -664,7 +870,7 @@ const noteColumns = [
           </div>
         </div>
         <MedalsGrid
-          :earned-medal-ids="student.earnedMedalIds || []"
+          :earned-medal-ids="student.earnedMedalIds"
           @medal-click="handleMedalClick"
         />
         <div class="progress-section card">
@@ -678,15 +884,15 @@ const noteColumns = [
           </div>
           <DetailedProgressBar
             v-if="course"
-            :chapters="course.chapters || []"
-            :progress-data="student.chapterProgress || []"
+            :chapters="course.chapters"
+            :progress-data="student.chapterProgress"
           />
         </div>
         <div class="card">
           <div class="card-header"><h4>تکالیف</h4></div>
           <BaseTable
             :columns="assignmentColumns"
-            :data="studentAssignments || []"
+            :data="studentAssignments"
             :rows-per-page="10"
             :row-class-fn="(item) => ({ 'overdue-row': item.isOverdue })"
           >
@@ -744,7 +950,7 @@ const noteColumns = [
               <i class="fa-solid fa-phone"></i> ثبت تماس جدید
             </button>
           </div>
-          <BaseTable :columns="callColumns" :data="studentCalls || []" :rows-per-page="10">
+          <BaseTable :columns="callColumns" :data="studentCalls" :rows-per-page="10">
             <template #cell-actions="{ item }">
               <button
                 @click="openDetailsModal('تماس: ' + item.topic, item.description)"
@@ -776,7 +982,7 @@ const noteColumns = [
         </div>
         <div class="card">
           <div class="card-header"><h4>لاگ اقدامات</h4></div>
-          <BaseTable :columns="logColumns" :data="student.actionLogs || []" :rows-per-page="5">
+          <BaseTable :columns="logColumns" :data="student.actionLogs" :rows-per-page="5">
             <template #cell-actions="{ item }">
               <button
                 @click="openDetailsModal('اقدام: ' + item.action, item.description)"
@@ -795,7 +1001,7 @@ const noteColumns = [
               <i class="fa-solid fa-plus"></i> افزودن یادداشت
             </button>
           </div>
-          <BaseTable :columns="noteColumns" :data="student.notes || []" :rows-per-page="5">
+          <BaseTable :columns="noteColumns" :data="studentNotes" :rows-per-page="5">
             <template #cell-actions="{ item }">
               <button
                 @click="openDeleteNoteModal(item)"
@@ -811,7 +1017,7 @@ const noteColumns = [
             <form @submit.prevent="handleAddCourse" class="modal-form">
               <div class="form-group">
                 <label for="course-select-modal">دوره را انتخاب کنید</label>
-                <select id="course-select-modal" v-model="newEnrollment.courseId" required>
+                <select id="course-select-modal" v-model="newEnrollment.courseId" @change="updateAvailableTerms" required>
                   <option disabled value="">یک دوره انتخاب کنید...</option>
                   <option v-for="course in availableCourses" :key="course.id" :value="course.id">
                     {{ course.name }}
@@ -875,7 +1081,7 @@ const noteColumns = [
     </BaseModal>
     <BaseModal :show="isModalOpen" @close="isModalOpen = false" size="lg">
       <template #header>
-        <h2>ارزیابی تکلیف: {{ student?.name }} - {{ selectedAssignment?.title }}</h2>
+        <h2>ارزیابی تکلیف: {{ student.name }} - {{ selectedAssignment?.title }}</h2>
       </template>
       <div v-if="selectedAssignment" class="modal-body-content">
         <div class="submissions-wrapper">
@@ -1143,7 +1349,7 @@ const noteColumns = [
       size="lg"
     >
       <template #header
-        ><h2>ویرایش اقساط: {{ student?.name }}</h2></template
+        ><h2>ویرایش اقساط: {{ student.name }}</h2></template
       >
       <div class="installments-modal">
         <div class="summary-bar">

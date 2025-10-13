@@ -1,17 +1,24 @@
 <script setup>
-import { useDataStore } from '@/stores/dataStore.js'
 import BaseTable from '@/components/BaseTable.vue'
 import AssignmentStatusIcons from '@/components/AssignmentStatusIcons.vue'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useLayoutStore } from '@/stores/layout.js'
 import HeartRating from '@/components/HeartRating.vue'
 import BaseModal from '@/components/BaseModal.vue'
 import anonymousAvatar from '@/assets/avatar-anonymous.svg'
+import api from '@/services/api'
 
 const layoutStore = useLayoutStore()
-const dataStore = useDataStore()
-onMounted(() => {
+const students = ref([])
+
+onMounted(async () => {
   layoutStore.setPageTitle('کل هنرجویان')
+  try {
+    const response = await api.getProfiles()
+    students.value = response.data
+  } catch (error) {
+    console.error("Failed to fetch students:", error)
+  }
 })
 
 // --- منطق مودال افزودن هنرجو ---
@@ -28,14 +35,63 @@ function openAddStudentModal() {
   isAddModalOpen.value = true
 }
 
-function handleAddStudent() {
+async function handleAddStudent() {
   if (newStudent.value.name && newStudent.value.phone) {
-    dataStore.addStudent(newStudent.value)
-    isAddModalOpen.value = false
+    try {
+      // تبدیل داده‌های فرم به فرمت API
+      const [firstName, ...lastNameParts] = newStudent.value.name.split(' ')
+      const lastName = lastNameParts.join(' ')
+      
+      const profileData = {
+        user: {
+          first_name: firstName,
+          last_name: lastName,
+          phone_number: newStudent.value.phone,
+        },
+        birth_year: newStudent.value.birthYear || null,
+        city: newStudent.value.city || null,
+      }
+      
+      await api.createProfile(profileData)
+      
+      // بارگذاری مجدد لیست هنرجویان
+      const response = await api.getProfiles()
+      students.value = response.data
+      
+      isAddModalOpen.value = false
+    } catch (error) {
+      console.error("Failed to create student:", error)
+      alert('خطا در ثبت هنرجو. لطفاً دوباره تلاش کنید.')
+    }
   } else {
     alert('لطفاً نام و شماره تلفن را وارد کنید.')
   }
 }
+
+// تبدیل داده‌های API به فرمت مورد انتظار جدول
+const studentsWithDetails = computed(() => {
+  return students.value.map(profile => ({
+    ...profile,
+    // تبدیل ساختار API به ساختار مورد انتظار فرانت‌اند
+    id: profile.user?.id || profile.id,
+    name: `${profile.user?.first_name || ''} ${profile.user?.last_name || ''}`.trim() || profile.name,
+    phone: profile.user?.phone_number || profile.phone,
+    course: profile.term?.course?.name || '-',
+    term: profile.term?.name || '-',
+    apollonyar: profile.apollonyar?.first_name || '-',
+    group: profile.group?.name || '-',
+    // اضافه کردن فیلدهای مورد انتظار جدول (با مقادیر پیش‌فرض)
+    assignmentStatus: profile.assignment_status || [],
+    daysSinceLastContact: profile.days_since_last_contact || 0,
+    accountStatus: profile.account_status || 'آزاد',
+    studentType: profile.student_type || 'عادی',
+    enrollmentStatus: profile.enrollment_status || 'حاضر',
+    accessStatus: profile.access_status || 'فعال',
+    watchTime: profile.watch_time || '0h',
+    hearts: profile.hearts || 0,
+    score: profile.score || null,
+  }))
+})
 
 const tableColumns = [
   { key: 'actions', label: '', sortable: false, filterable: false },
@@ -64,7 +120,7 @@ const tableColumns = [
       </button>
     </div>
 
-    <BaseTable :columns="tableColumns" :data="dataStore.studentsWithDetails" :rows-per-page="15">
+    <BaseTable :columns="tableColumns" :data="studentsWithDetails" :rows-per-page="15">
       <template #cell-actions="{ item }">
         <RouterLink
           :to="{ name: 'student-profile', params: { id: item.id } }"

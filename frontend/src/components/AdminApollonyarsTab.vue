@@ -1,10 +1,32 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { useDataStore } from '@/stores/dataStore.js'
+import { ref, computed, onMounted } from 'vue'
 import BaseTable from '@/components/BaseTable.vue'
 import BaseModal from '@/components/BaseModal.vue'
+import api from '@/services/api'
 
-const dataStore = useDataStore()
+const apollonyars = ref([])
+
+// Load apollonyars data on mount
+onMounted(async () => {
+  try {
+    const response = await api.getApollonyars()
+    apollonyars.value = response.data
+  } catch (error) {
+    console.error("Failed to fetch apollonyars:", error)
+  }
+})
+
+// Transform apollonyars data for table display
+const apollonyarsForTable = computed(() => {
+  return apollonyars.value.map(apollonyar => ({
+    ...apollonyar,
+    name: `${apollonyar.first_name || ''} ${apollonyar.last_name || ''}`.trim(),
+    phone: apollonyar.phone_number,
+    telegramId: apollonyar.telegram_id || '-',
+    status: apollonyar.is_active ? 'آزاد' : 'مسدود',
+    avgScore: apollonyar.avg_score || 0,
+  }))
+})
 
 // --- وضعیت مودال‌ها ---
 const showApollonyarModal = ref(false)
@@ -34,22 +56,38 @@ function openEditModal(apollonyar) {
 }
 
 // --- توابع ثبت و حذف ---
-function handleSubmit() {
-  if (isEditMode.value) {
-    console.log('Updating Apollonyar:', currentApollonyar.value)
-    // dataStore.updateApollonyar(currentApollonyar.value); // برای پیاده‌سازی در آینده
-  } else {
-    console.log('Adding new Apollonyar:', currentApollonyar.value)
-    // dataStore.addApollonyar(currentApollonyar.value); // برای پیاده‌سازی در آینده
+async function handleSubmit() {
+  try {
+    if (isEditMode.value) {
+      await api.updateApollonyar(currentApollonyar.value.id, currentApollonyar.value)
+      console.log('Apollonyar updated successfully')
+    } else {
+      await api.createApollonyar(currentApollonyar.value)
+      console.log('Apollonyar created successfully')
+    }
+    // Refresh apollonyars data
+    const response = await api.getApollonyars()
+    apollonyars.value = response.data
+    showApollonyarModal.value = false
+  } catch (error) {
+    console.error('Failed to save apollonyar:', error)
+    alert('خطا در ذخیره آپولون‌یار. لطفاً دوباره تلاش کنید.')
   }
-  showApollonyarModal.value = false
 }
 
-function handleDelete() {
-  console.log('Deleting Apollonyar:', currentApollonyar.value.id)
-  // dataStore.deleteApollonyar(currentApollonyar.value.id); // برای پیاده‌سازی در آینده
-  showDeleteModal.value = false
-  showApollonyarModal.value = false
+async function handleDelete() {
+  try {
+    await api.deleteApollonyar(currentApollonyar.value.id)
+    console.log('Apollonyar deleted successfully')
+    // Refresh apollonyars data
+    const response = await api.getApollonyars()
+    apollonyars.value = response.data
+    showDeleteModal.value = false
+    showApollonyarModal.value = false
+  } catch (error) {
+    console.error('Failed to delete apollonyar:', error)
+    alert('خطا در حذف آپولون‌یار. لطفاً دوباره تلاش کنید.')
+  }
 }
 
 const modalTitle = computed(() => {
@@ -76,7 +114,7 @@ const tableColumns = [
       </button>
     </div>
 
-    <BaseTable :columns="tableColumns" :data="dataStore.apollonyarsForTable" :rows-per-page="10">
+    <BaseTable :columns="tableColumns" :data="apollonyarsForTable" :rows-per-page="10">
       <template #cell-status="{ item }">
         <span
           class="status-bubble"

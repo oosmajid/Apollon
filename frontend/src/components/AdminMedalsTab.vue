@@ -1,10 +1,34 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { useDataStore } from '@/stores/dataStore.js'
+import { ref, computed, onMounted } from 'vue'
 import BaseTable from '@/components/BaseTable.vue'
 import BaseModal from '@/components/BaseModal.vue'
+import api from '@/services/api'
 
-const dataStore = useDataStore()
+const medals = ref([])
+const students = ref([])
+
+// Load data on mount
+onMounted(async () => {
+  try {
+    const [medalsRes, studentsRes] = await Promise.all([
+      api.getMedals(),
+      api.getProfiles()
+    ])
+    medals.value = medalsRes.data
+    students.value = studentsRes.data
+  } catch (error) {
+    console.error("Failed to fetch data:", error)
+  }
+})
+
+// Transform medals data for table display
+const medalsForTable = computed(() => {
+  return medals.value.map(medal => ({
+    ...medal,
+    holderCount: medal.holders_count || 0,
+    students: medal.students || [],
+  }))
+})
 
 // --- وضعیت مودال‌ها ---
 const isStudentsModalOpen = ref(false)
@@ -59,19 +83,38 @@ function handleIconUpload(event) {
   }
 }
 
-function handleSubmit() {
-  if (isEditMode.value) {
-    console.log('Updating Medal:', currentMedal.value)
-  } else {
-    console.log('Adding new Medal:', currentMedal.value)
+async function handleSubmit() {
+  try {
+    if (isEditMode.value) {
+      await api.updateMedal(currentMedal.value.id, currentMedal.value)
+      console.log('Medal updated successfully')
+    } else {
+      await api.createMedal(currentMedal.value)
+      console.log('Medal created successfully')
+    }
+    // Refresh medals data
+    const response = await api.getMedals()
+    medals.value = response.data
+    showMedalModal.value = false
+  } catch (error) {
+    console.error('Failed to save medal:', error)
+    alert('خطا در ذخیره مدال. لطفاً دوباره تلاش کنید.')
   }
-  showMedalModal.value = false
 }
 
-function handleDelete() {
-  console.log('Deleting Medal:', currentMedal.value.id)
-  showDeleteModal.value = false
-  showMedalModal.value = false
+async function handleDelete() {
+  try {
+    await api.deleteMedal(currentMedal.value.id)
+    console.log('Medal deleted successfully')
+    // Refresh medals data
+    const response = await api.getMedals()
+    medals.value = response.data
+    showDeleteModal.value = false
+    showMedalModal.value = false
+  } catch (error) {
+    console.error('Failed to delete medal:', error)
+    alert('خطا در حذف مدال. لطفاً دوباره تلاش کنید.')
+  }
 }
 
 const modalTitle = computed(() => {
@@ -104,7 +147,7 @@ const studentTableColumns = [
       </button>
     </div>
 
-    <BaseTable :columns="tableColumns" :data="dataStore.medalsForTable" :rows-per-page="10">
+    <BaseTable :columns="tableColumns" :data="medalsForTable" :rows-per-page="10">
       <template #cell-name="{ item }">
         <i :class="item.icon" class="medal-icon"></i> {{ item.name }}
       </template>

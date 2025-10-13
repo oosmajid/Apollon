@@ -1,8 +1,23 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { useDataStore } from '@/stores/dataStore' // جدید: برای دسترسی به دوره‌ها و ترم‌ها
+import { ref, computed, onMounted } from 'vue'
+import api from '@/services/api'
 
-const dataStore = useDataStore() // جدید
+const courses = ref([])
+const terms = ref([])
+
+// Load courses and terms data on mount
+onMounted(async () => {
+  try {
+    const [coursesRes, termsRes] = await Promise.all([
+      api.getCourses(),
+      api.getTerms()
+    ])
+    courses.value = coursesRes.data
+    terms.value = termsRes.data
+  } catch (error) {
+    console.error("Failed to fetch courses and terms:", error)
+  }
+})
 
 const formData = ref({
   rulesAgreement: null,
@@ -42,7 +57,7 @@ const availableTerms = computed(() => {
   if (!formData.value.courseId) {
     return []
   }
-  return dataStore.terms.filter((term) => term.courseId === formData.value.courseId)
+  return terms.value.filter((term) => term.courseId === formData.value.courseId)
 })
 
 // جدید: ریست کردن ترم با تغییر دوره
@@ -167,7 +182,7 @@ function handleSubmit() {
               <label for="course" class="form-label">قصد شرکت در کدام دوره را دارید؟</label>
               <select id="course" v-model="formData.courseId" @change="handleCourseChange" required>
                 <option :value="null" disabled>ابتدا دوره را انتخاب کنید...</option>
-                <option v-for="course in dataStore.courses" :key="course.id" :value="course.id">
+                <option v-for="course in courses" :key="course.id" :value="course.id">
                   {{ course.name }}
                 </option>
               </select>
