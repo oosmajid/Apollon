@@ -94,7 +94,7 @@ const tableColumns = [
       </template>
       
       <template #cell-status="{ item }">
-        <span class="status-badge" :class="item.status.replace(' ', '_')">{{ item.status }}</span>
+        <span class="status-badge" :class="item.status ? item.status.replace(' ', '_') : 'unknown'">{{ item.status || 'نامشخص' }}</span>
       </template>
 
       <template #cell-actions="{ item }">

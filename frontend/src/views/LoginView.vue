@@ -1,9 +1,11 @@
 <script setup>
 import { ref, onUnmounted } from 'vue' // onUnmounted را اضافه می‌کنیم
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth.js'
 import api from '@/services/api'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const loginMode = ref('otp')
 const step = ref(1)
 const phoneNumber = ref('')
@@ -49,9 +51,13 @@ async function handleLogin() {
             })
         }
 
-        // ذخیره توکن‌ها در localStorage
-        localStorage.setItem('accessToken', response.data.access);
-        localStorage.setItem('refreshToken', response.data.refresh);
+        // ذخیره توکن‌ها در localStorage و store
+        authStore.setTokens(response.data.access, response.data.refresh)
+        
+        // ذخیره اطلاعات کاربر
+        if (response.data.user) {
+          authStore.setUser(response.data.user)
+        }
         
         // انتقال کاربر به صفحه اصلی
         router.push({ name: 'all-students' })

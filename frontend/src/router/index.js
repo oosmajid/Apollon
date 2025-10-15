@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import MainLayout from '../layouts/MainLayout.vue'
+import { useAuthStore } from '../stores/auth.js'
 
 // کامپوننت‌های صفحات
 import AllStudentsView from '../views/AllStudentsView.vue'
@@ -23,11 +24,13 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: LoginView,
+      meta: { requiresGuest: true }
     },
     {
       path: '/register',
       name: 'register',
       component: RegistrationView,
+      meta: { requiresGuest: true }
     },
     {
       path: '/course/photoshop', // می‌توانید این آدرس را به دلخواه تغییر دهید
@@ -43,10 +46,12 @@ const router = createRouter({
       path: '/my-profile/:id',
       name: 'student-self-profile',
       component: StudentSelfProfileView,
+      meta: { requiresAuth: true }
     },
     {
       path: '/',
       component: MainLayout,
+      meta: { requiresAuth: true },
       children: [
         {
           path: '',
@@ -91,6 +96,30 @@ const router = createRouter({
       ],
     },
   ],
+})
+
+// Route guards
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  
+  // Check if user is authenticated
+  const isAuthenticated = authStore.checkAuth()
+  
+  // If route requires authentication and user is not authenticated
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    console.log('Access denied: Authentication required for', to.path)
+    next({ name: 'login' })
+    return
+  }
+  
+  // If route requires guest (like login page) and user is authenticated
+  if (to.meta.requiresGuest && isAuthenticated) {
+    console.log('Redirecting authenticated user away from guest page')
+    next({ name: 'all-students' })
+    return
+  }
+  
+  next()
 })
 
 export default router

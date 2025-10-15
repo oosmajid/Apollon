@@ -149,7 +149,7 @@ const studentTableColumns = [
 
     <BaseTable :columns="tableColumns" :data="medalsForTable" :rows-per-page="10">
       <template #cell-name="{ item }">
-        <i :class="item.icon" class="medal-icon"></i> {{ item.name }}
+        <i :class="item.icon || 'fa-solid fa-award'" class="medal-icon"></i> {{ item.name }}
       </template>
 
       <template #cell-description="{ item }">

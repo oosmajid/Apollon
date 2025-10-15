@@ -43,7 +43,9 @@ const tableColumns = [
         </span>
       </template>
       <template #cell-paymentStatus="{ item }">
-        <span class="status-badge" :class="item.paymentStatus.replace(' ', '-')">{{ item.paymentStatus }}</span>
+        <span class="status-badge" :class="item.paymentStatus ? item.paymentStatus.replace(' ', '-') : 'unknown'">
+          {{ item.paymentStatus || 'نامشخص' }}
+        </span>
       </template>
        <template #cell-courseStatus="{ item }">
         <span class="status-badge" :class="item.courseStatus === 'فعال' ? 'active' : 'inactive'">

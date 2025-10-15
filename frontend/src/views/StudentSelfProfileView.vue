@@ -316,7 +316,7 @@ onMounted(async () => {
             <div class="card-title"><h4>وضعیت</h4></div>
             <p>
               <span class="status-bubble" :class="`status-${student.status}`">{{
-                student.status
+                student.enrollmentStatus
               }}</span>
             </p>
           </div>

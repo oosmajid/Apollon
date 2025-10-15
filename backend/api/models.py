@@ -146,7 +146,7 @@ class Profile(models.Model):
     sales_representative = models.ForeignKey(Apollonyar, on_delete=models.SET_NULL, null=True, blank=True, related_name='sold_profiles', verbose_name="نماینده فروش")
 
     TYPE_CHOICES = [('term-based', 'ترمی'), ('self-study', 'خودخوان')]
-    STATUS_CHOICES = [('active', 'فعال'), ('suspended', 'معلق'), ('optout', 'انصراف')]
+    STATUS_CHOICES = [('active', 'آزاد'), ('suspended', 'مسدود'), ('optout', 'انصراف')]
     
     type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='term-based', verbose_name="نوع")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', verbose_name="وضعیت")

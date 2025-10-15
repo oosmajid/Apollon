@@ -1,9 +1,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-
 import { useLayoutStore } from '@/stores/layout.js'
+import { useAuthStore } from '@/stores/auth.js'
 
 const layoutStore = useLayoutStore()
+const authStore = useAuthStore()
 
 // 1. یک متغیر برای نگهداری وضعیت تم می‌سازیم
 // مقدار اولیه را از حافظه localStorage می‌خوانیم
@@ -18,7 +19,12 @@ function toggleTheme() {
   document.documentElement.setAttribute('data-theme', currentTheme.value);
 }
 
-// 3. وقتی کامپوننت برای اولین بار نمایش داده شد، تم ذخیره شده را اعمال می‌کنیم
+// 3. تابع خروج از سیستم
+function handleLogout() {
+  authStore.logout()
+}
+
+// 4. وقتی کامپوننت برای اولین بار نمایش داده شد، تم ذخیره شده را اعمال می‌کنیم
 onMounted(() => {
   document.documentElement.setAttribute('data-theme', currentTheme.value);
 });
@@ -34,8 +40,10 @@ onMounted(() => {
         </button>
       </div>
       <div class="profile-menu">
-        <span id="apollonyar-name">خوش آمدید، علی رضایی</span>
-        <a href="#" class="logout-btn" title="خروج">
+        <span id="apollonyar-name">
+          خوش آمدید، {{ authStore.fullName }}
+        </span>
+        <a href="#" class="logout-btn" title="خروج" @click.prevent="handleLogout">
           <i class="fa-solid fa-arrow-right-from-bracket"></i>
         </a>
       </div>

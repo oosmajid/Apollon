@@ -73,7 +73,7 @@ const studentsWithDetails = computed(() => {
   return students.value.map(profile => ({
     ...profile,
     // تبدیل ساختار API به ساختار مورد انتظار فرانت‌اند
-    id: profile.user?.id || profile.id,
+    id: profile.id, // استفاده از profile.id برای پروفایل
     name: `${profile.user?.first_name || ''} ${profile.user?.last_name || ''}`.trim() || profile.name,
     phone: profile.user?.phone_number || profile.phone,
     course: profile.term?.course?.name || '-',

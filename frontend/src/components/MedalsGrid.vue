@@ -48,7 +48,7 @@ const sortedMedals = computed(() => {
         :title="medal.name"
         @click="emit('medal-click', medal)" 
       >
-        <i :class="medal.icon"></i>
+        <i :class="medal.icon || 'fa-solid fa-award'"></i>
         <span>{{ medal.name }}</span>
       </div>
     </div>

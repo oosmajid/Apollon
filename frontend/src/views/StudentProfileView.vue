@@ -25,6 +25,7 @@ const studentAssignments = ref([])
 const studentCalls = ref([])
 const studentNotes = ref([])
 const studentPaymentHistory = ref([])
+const studentActionLogs = ref([])
 const availableCourses = ref([])
 const availableTerms = ref([])
 const allTerms = ref([])
@@ -88,6 +89,9 @@ onMounted(async () => {
         
         // Calculate call topics - will be updated when course changes
         callTopics.value = ['تماس انصراف', 'تماس پیگیری قسط', 'سایر'];
+        
+        // Load action logs
+        await loadActionLogs();
 
     } catch (error) {
         console.error("Failed to load student profile data:", error);
@@ -96,6 +100,16 @@ onMounted(async () => {
 });
 
 // These are now refs defined above
+
+async function loadActionLogs() {
+    try {
+        const response = await api.getLogs();
+        studentActionLogs.value = response.data;
+    } catch (error) {
+        console.error("Failed to load action logs:", error);
+        studentActionLogs.value = [];
+    }
+}
 
 function openAddCourseModal() {
   newEnrollment.value = { courseId: '', termId: '' }
@@ -599,8 +613,7 @@ function openAddNoteModal() {
 async function submitNewNote() {
   try {
     await api.addNoteToStudent(studentId, { 
-      text: newNoteText.value,
-      author: 'مدیر سیستم' // این باید از اطلاعات کاربر فعلی گرفته شود
+      text: newNoteText.value
     });
     
     // آپدیت کردن یادداشت‌ها
@@ -675,8 +688,9 @@ const callColumns = [
 const logColumns = [
   { key: 'actions', label: '' },
   { key: 'action', label: 'اقدام' },
-  { key: 'dateTime', label: 'تاریخ و ساعت' },
-  { key: 'author', label: 'توسط' },
+  { key: 'timestamp_formatted', label: 'تاریخ و ساعت' },
+  { key: 'issuer_name', label: 'توسط' },
+  { key: 'description', label: 'توضیحات' },
 ]
 const noteColumns = [
   { key: 'actions', label: '', width: '60px' },
@@ -806,7 +820,7 @@ const noteColumns = [
             </div>
             <p>
               <span class="status-bubble" :class="`status-${student.status}`">{{
-                student.status
+                student.enrollmentStatus
               }}</span>
             </p>
           </div>
@@ -982,7 +996,7 @@ const noteColumns = [
         </div>
         <div class="card">
           <div class="card-header"><h4>لاگ اقدامات</h4></div>
-          <BaseTable :columns="logColumns" :data="student.actionLogs" :rows-per-page="5">
+          <BaseTable :columns="logColumns" :data="studentActionLogs" :rows-per-page="5">
             <template #cell-actions="{ item }">
               <button
                 @click="openDetailsModal('اقدام: ' + item.action, item.description)"
@@ -1242,7 +1256,7 @@ const noteColumns = [
       <div v-if="student">
         <div class="modal-info-box">
           <div class="info-item">
-            <span>وضعیت فعلی:</span> <strong>{{ student.status }}</strong>
+            <span>وضعیت فعلی:</span> <strong>{{ student.enrollmentStatus }}</strong>
           </div>
         </div>
         <form @submit.prevent="submitStatusChange" class="modal-form">

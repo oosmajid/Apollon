@@ -146,19 +146,19 @@ export default {
         return apiClient.delete(`/profiles/${profileId}/enrollments/${enrollmentId}/`);
     },
     addMedalToStudent(profileId, medalData) {
-        return apiClient.post(`/profiles/${profileId}/medals/`, medalData);
+        return apiClient.post(`/profiles/${profileId}/add_medal/`, medalData);
     },
     removeMedalFromStudent(profileId, medalId) {
-        return apiClient.delete(`/profiles/${profileId}/medals/${medalId}/`);
+        return apiClient.delete(`/profiles/${profileId}/remove_medal/`, { data: { medalId } });
     },
     addNoteToStudent(profileId, noteData) {
-        return apiClient.post(`/profiles/${profileId}/notes/`, noteData);
+        return apiClient.post(`/profiles/${profileId}/add_note/`, noteData);
     },
     removeNoteFromStudent(profileId, noteId) {
-        return apiClient.delete(`/profiles/${profileId}/notes/${noteId}/`);
+        return apiClient.delete(`/profiles/${profileId}/remove_note/`, { data: { noteId } });
     },
     updateStudentInstallments(profileId, installmentsData) {
-        return apiClient.patch(`/profiles/${profileId}/installments/`, installmentsData);
+        return apiClient.patch(`/profiles/${profileId}/update_installments/`, installmentsData);
     },
     changeStudentTerm(profileId, termData) {
         return apiClient.patch(`/profiles/${profileId}/change_term/`, termData);
@@ -173,7 +173,12 @@ export default {
         return apiClient.patch(`/profiles/${profileId}/change_status/`, statusData);
     },
     updateAssignmentDueDate(assignmentId, dueDateData) {
-        return apiClient.patch(`/assignments/${assignmentId}/`, dueDateData);
+        return apiClient.patch(`/assignments/${assignmentId}/update_due_date/`, dueDateData);
+    },
+    
+    // Logs API
+    getLogs() {
+        return apiClient.get('/logs/');
     },
 
     // --- Additional API functions ---
