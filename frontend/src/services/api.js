@@ -11,9 +11,15 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-            config.headers['Authorization'] = `Bearer ${token}`;
+        // Don't add Authorization header for auth endpoints
+        const authEndpoints = ['/auth/login/', '/auth/otp/request/', '/auth/otp/verify/'];
+        const isAuthEndpoint = authEndpoints.some(endpoint => config.url.includes(endpoint));
+        
+        if (!isAuthEndpoint) {
+            const token = localStorage.getItem('accessToken');
+            if (token) {
+                config.headers['Authorization'] = `Bearer ${token}`;
+            }
         }
         return config;
     },

@@ -21,9 +21,14 @@ async function getOtp() {
     isLoading.value = true
     try {
         const response = await api.requestOtp(phoneNumber.value)
-        console.log('OTP Code for testing:', response.data.otp_code_for_test); // نمایش کد در کنسول مرورگر
+        console.log('OTP request successful:', response.data.message); // نمایش پیام موفقیت در کنسول مرورگر
         step.value = 2
+        startTimer() // Start the countdown timer after successful OTP request
     } catch (error) {
+        console.error('OTP request failed:', error);
+        console.error('Error response:', error.response?.data);
+        console.error('Error status:', error.response?.status);
+        console.error('Error message:', error.message);
         errorMessage.value = 'خطایی در ارسال کد رخ داد.'
     } finally {
         isLoading.value = false
@@ -76,11 +81,21 @@ function startTimer() {
   }, 1000)
 }
 
-function resendOtp() {
+async function resendOtp() {
   console.log('Resending OTP to:', phoneNumber.value)
   errorMessage.value = ''
   otp.value = ''
-  startTimer() // تایمر را مجددا شروع کن
+  isLoading.value = true
+  
+  try {
+    await api.requestOtp(phoneNumber.value)
+    startTimer() // تایمر را مجددا شروع کن
+  } catch (error) {
+    console.error('Resend OTP failed:', error);
+    errorMessage.value = 'خطایی در ارسال مجدد کد رخ داد.'
+  } finally {
+    isLoading.value = false
+  }
 }
 
 // پاک کردن تایمر هنگام خروج از کامپوننت برای جلوگیری از نشت حافظه

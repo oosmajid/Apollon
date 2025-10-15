@@ -69,7 +69,11 @@ class OTPRequestView(generics.GenericAPIView):
         # اما برای تست، آن را در کنسول پرینت می‌کنیم
         print(f"OTP Code for {phone_number} is: {otp_code}")
 
-        return Response({"message": "کد تایید با موفقیت ارسال شد."}, status=status.HTTP_200_OK)
+        # برای تست، کد OTP را در پاسخ هم برمی‌گردانیم
+        return Response({
+            "message": "کد تایید با موفقیت ارسال شد.",
+            "otp_code_for_test": otp_code  # فقط برای محیط تست
+        }, status=status.HTTP_200_OK)
 
 
 class OTPVerifyView(generics.GenericAPIView):
