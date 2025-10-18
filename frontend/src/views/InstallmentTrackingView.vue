@@ -6,16 +6,45 @@ import api from '@/services/api';
 
 const layoutStore = useLayoutStore();
 const installments = ref([]);
-onMounted(async () => {
-  layoutStore.setPageTitle('پیگیری اقساط');
+const pagination = ref({
+  page: 1,
+  pageSize: 20,
+  total: 0,
+  totalPages: 0
+});
+const loading = ref(false);
+
+async function loadInstallments(page = 1) {
+  loading.value = true;
   try {
-    // <--- ۳. داده‌ها را از API جدید فراخوانی کنید
-    const response = await api.getInstallments();
-    installments.value = response.data;
+    const params = {
+      page,
+      page_size: pagination.value.pageSize,
+    };
+
+    const response = await api.getInstallments(params);
+
+    // فرمت پاسخ Django pagination
+    installments.value = response.data.results || response.data;
+    pagination.value.total = response.data.count || installments.value.length;
+    pagination.value.page = page;
+    pagination.value.totalPages = Math.ceil(pagination.value.total / pagination.value.pageSize);
   } catch (error) {
     console.error("Failed to fetch installments:", error);
+  } finally {
+    loading.value = false;
   }
+}
+
+onMounted(async () => {
+  layoutStore.setPageTitle('پیگیری اقساط');
+  await loadInstallments();
 });
+
+// تابع تغییر صفحه
+function handlePageChange(page) {
+  loadInstallments(page);
+}
 
 // ستون جدید "actions" اضافه شد
 const tableColumns = [
@@ -36,7 +65,16 @@ const tableColumns = [
 
 <template>
   <div class="view-container">
-    <BaseTable :columns="tableColumns" :data="installments" :rows-per-page="20">
+    <BaseTable
+      :columns="tableColumns"
+      :data="installments"
+      :rows-per-page="pagination.pageSize"
+      :server-side="true"
+      :total-items="pagination.total"
+      :current-page="pagination.page"
+      :loading="loading"
+      @page-change="handlePageChange"
+    >
       <template #cell-daysRemaining="{ item }">
         <span :class="item.daysRemaining < 0 ? 'days-past' : 'days-future'">
           {{ Math.abs(item.daysRemaining) }}

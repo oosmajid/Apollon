@@ -3,7 +3,7 @@
 from rest_framework import serializers
 from .models import (
     User, Course, Term, Apollonyar, Group, MedalDef, DiscountCode,
-    AssignmentDef, CallDef, Profile, AssignmentSubmissionFile, AssignmentSubmission, Assignment,
+    AssignmentDef, AssignmentFile, CallDef, Profile, AssignmentSubmissionFile, AssignmentSubmission, Assignment,
     Call, Note, Transaction, TransactionNote, Installment
     )
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -256,8 +256,8 @@ class ProfileSerializer(serializers.ModelSerializer):
     
     def get_totalCourseFee(self, obj):
         # محاسبه کل مبلغ دوره بر اساس اقساط
-        if obj.term:
-            return float(obj.term.price) if obj.term.price else 0
+        if obj.term and obj.term.course:
+            return float(obj.term.course.total_price) if obj.term.course.total_price else 0
         return 0
     
     def get_earnedMedalIds(self, obj):
@@ -348,6 +348,11 @@ class MedalDefSerializer(serializers.ModelSerializer):
 class DiscountCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = DiscountCode
+        fields = '__all__'
+
+class AssignmentFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AssignmentFile
         fields = '__all__'
 
 class AssignmentDefSerializer(serializers.ModelSerializer):

@@ -7,17 +7,45 @@ import { useLayoutStore } from '@/stores/layout.js';
 
 const layoutStore = useLayoutStore();
 const transactions = ref([]);
+const pagination = ref({
+  page: 1,
+  pageSize: 20,
+  total: 0,
+  totalPages: 0
+});
+const loading = ref(false);
+
+async function loadTransactions(page = 1) {
+  loading.value = true;
+  try {
+    const params = {
+      page,
+      page_size: pagination.value.pageSize,
+    };
+
+    const response = await api.getTransactions(params);
+
+    // فرمت پاسخ Django pagination
+    transactions.value = response.data.results || response.data;
+    pagination.value.total = response.data.count || transactions.value.length;
+    pagination.value.page = page;
+    pagination.value.totalPages = Math.ceil(pagination.value.total / pagination.value.pageSize);
+  } catch (error) {
+    console.error("Failed to fetch transactions:", error);
+  } finally {
+    loading.value = false;
+  }
+}
 
 onMounted(async () => {
   layoutStore.setPageTitle('تراکنش‌ها');
-  try {
-    // <--- ۳. داده‌ها را از API جدید فراخوانی کنید
-    const response = await api.getTransactions();
-    transactions.value = response.data;
-  } catch (error) {
-    console.error("Failed to fetch transactions:", error);
-  }
+  await loadTransactions();
 });
+
+// تابع تغییر صفحه
+function handlePageChange(page) {
+  loadTransactions(page);
+}
 
 const isModalOpen = ref(false);
 const selectedTransaction = ref(null);
@@ -33,8 +61,7 @@ async function handleTransactionStatus(status) {
   try {
     await api.verifyTransaction(selectedTransaction.value.id, { status: status });
     // آپدیت کردن لیست تراکنش‌ها
-    const response = await api.getTransactions();
-    transactions.value = response.data;
+    await loadTransactions(pagination.value.page);
     isModalOpen.value = false;
   } catch (error) {
     console.error("Failed to update transaction status:", error);
@@ -44,15 +71,14 @@ async function handleTransactionStatus(status) {
 async function submitNewNote() {
     if (newNote.value.trim()) {
         try {
-            await api.addTransactionNote(selectedTransaction.value.id, { 
+            await api.addTransactionNote(selectedTransaction.value.id, {
                 text: newNote.value.trim(),
                 author: 'مدیر سیستم' // این باید از اطلاعات کاربر فعلی گرفته شود
             });
-            
+
             // آپدیت کردن لیست تراکنش‌ها برای دریافت یادداشت جدید
-            const response = await api.getTransactions();
-            transactions.value = response.data;
-            
+            await loadTransactions(pagination.value.page);
+
             // آپدیت کردن تراکنش انتخاب شده
             const updatedTransaction = transactions.value.find(t => t.id === selectedTransaction.value.id);
             if (updatedTransaction) {
@@ -79,7 +105,16 @@ const tableColumns = [
 
 <template>
   <div class="view-container">
-    <BaseTable :columns="tableColumns" :data="transactions" :rows-per-page="15">
+    <BaseTable
+      :columns="tableColumns"
+      :data="transactions"
+      :rows-per-page="pagination.pageSize"
+      :server-side="true"
+      :total-items="pagination.total"
+      :current-page="pagination.page"
+      :loading="loading"
+      @page-change="handlePageChange"
+    >
       <template #cell-type="{ item }">
         <span class="type-cell-icon-only">
           <i

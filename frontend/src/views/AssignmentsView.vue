@@ -8,17 +8,46 @@ import api from '@/services/api';
 
 const layoutStore = useLayoutStore();
 const assignments = ref([]);
+const pagination = ref({
+  page: 1,
+  pageSize: 20,
+  total: 0,
+  totalPages: 0
+});
+const loading = ref(false);
+
+async function loadAssignments(page = 1) {
+  loading.value = true;
+  try {
+    const params = {
+      page,
+      page_size: pagination.value.pageSize,
+    };
+
+    const response = await api.getAssignments(params);
+
+    // فرمت پاسخ Django pagination
+    assignments.value = response.data.results || response.data;
+    pagination.value.total = response.data.count || assignments.value.length;
+    pagination.value.page = page;
+    pagination.value.totalPages = Math.ceil(pagination.value.total / pagination.value.pageSize);
+  } catch (error) {
+    console.error("Failed to fetch assignments:", error);
+  } finally {
+    loading.value = false;
+  }
+}
 
 onMounted(async () => {
   layoutStore.setPageTitle('تکالیف');
-  try {
-    // <--- ۳. داده‌ها را از API جدید فراخوانی کنید
-    const response = await api.getAssignments(); // فرض می‌کنیم این تابع در api.js ساخته شود
-    assignments.value = response.data;
-  } catch (error) {
-    console.error("Failed to fetch assignments:", error);
-  }
+  await loadAssignments();
 });
+
+// تابع تغییر صفحه
+function handlePageChange(page) {
+  loadAssignments(page);
+}
+
 const isModalOpen = ref(false);
 const selectedAssignment = ref(null);
 
@@ -40,17 +69,16 @@ async function submitEvaluation() {
       grade: 5, // این باید از فرم گرفته شود
       feedback: 'ارزیابی انجام شد' // این باید از فرم گرفته شود
     };
-    
+
     // فرض می‌کنیم که آخرین submission را ارزیابی می‌کنیم
     const latestSubmission = selectedAssignment.value.submissions?.[0];
     if (latestSubmission) {
       await api.gradeSubmission(latestSubmission.id, gradeData);
-      
+
       // آپدیت کردن لیست تکالیف
-      const response = await api.getAssignments();
-      assignments.value = response.data;
+      await loadAssignments(pagination.value.page);
     }
-    
+
     isModalOpen.value = false;
   } catch (error) {
     console.error("Failed to submit evaluation:", error);
@@ -63,6 +91,8 @@ const tableColumns = [
   { key: 'studentName', label: 'نام هنرجو', sortable: true, filterable: true },
   { key: 'assignmentTitle', label: 'عنوان تکلیف', sortable: true, filterable: true },
   { key: 'course', label: 'دوره', sortable: true, filterable: true },
+  { key: 'apollonyar', label: 'آپولون‌یار', sortable: true, filterable: true },
+  { key: 'assessorApollonyar', label: 'شخص مصحح', sortable: true, filterable: true },
   { key: 'submissionDate', label: 'تاریخ ارسال', sortable: true, filterable: false },
   { key: 'reviewDate', label: 'تاریخ بررسی', sortable: true, filterable: false },
   { key: 'status', label: 'وضعیت بررسی', sortable: true, filterable: true },
@@ -72,7 +102,16 @@ const tableColumns = [
 
 <template>
   <div class="view-container">
-    <BaseTable :columns="tableColumns" :data="assignments" :rows-per-page="20">
+    <BaseTable
+      :columns="tableColumns"
+      :data="assignments"
+      :rows-per-page="pagination.pageSize"
+      :server-side="true"
+      :total-items="pagination.total"
+      :current-page="pagination.page"
+      :loading="loading"
+      @page-change="handlePageChange"
+    >
       <template #cell-actions="{ item }">
         <div class="action-buttons">
           <button @click="openEvaluationModal(item)" class="btn-sm btn-icon-only" title="مشاهده تکلیف">

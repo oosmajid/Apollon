@@ -13,6 +13,9 @@ const course = {
 const discountCode = ref('')
 const appliedDiscount = ref(0)
 const phoneNumber = ref('')
+const firstName = ref('')
+const lastName = ref('')
+const acceptTerms = ref(false)
 const discountErrorMessage = ref('') // متغیر جدید فقط برای خطای تخفیف
 const phoneErrorMessage = ref('') // متغیر جدید فقط برای خطای تلفن
 const successMessage = ref('')
@@ -23,6 +26,13 @@ const finalPrice = computed(() => {
 
 const isPhoneNumberValid = computed(() => {
   return phoneNumber.value.length === 11 && phoneNumber.value.startsWith('09')
+})
+
+const isFormValid = computed(() => {
+  return isPhoneNumberValid.value && 
+         firstName.value.trim() !== '' && 
+         lastName.value.trim() !== '' && 
+         acceptTerms.value
 })
 
 function applyDiscount() {
@@ -39,13 +49,24 @@ function applyDiscount() {
 
 function proceedToPayment() {
   phoneErrorMessage.value = '' // پاک کردن خطای قبلی تلفن
-  if (!isPhoneNumberValid.value) {
-    phoneErrorMessage.value = 'لطفاً شماره تلفن صحیح را وارد کنید.' // فقط متغیر خطای تلفن پر می‌شود
+  if (!isFormValid.value) {
+    if (!isPhoneNumberValid.value) {
+      phoneErrorMessage.value = 'لطفاً شماره تلفن صحیح را وارد کنید.'
+    } else if (firstName.value.trim() === '') {
+      phoneErrorMessage.value = 'لطفاً نام خود را وارد کنید.'
+    } else if (lastName.value.trim() === '') {
+      phoneErrorMessage.value = 'لطفاً نام خانوادگی خود را وارد کنید.'
+    } else if (!acceptTerms.value) {
+      phoneErrorMessage.value = 'لطفاً قوانین و مقررات را بپذیرید.'
+    }
     return
   }
   console.log('Redirecting to payment gateway for:', {
+    firstName: firstName.value,
+    lastName: lastName.value,
     phone: phoneNumber.value,
     finalPrice: finalPrice.value,
+    acceptTerms: acceptTerms.value,
   })
   router.push({ name: 'redirecting' })
 }
@@ -105,7 +126,44 @@ function proceedToPayment() {
           <p v-if="phoneErrorMessage" class="feedback-message error">{{ phoneErrorMessage }}</p>
         </div>
 
-        <button @click="proceedToPayment" class="btn btn-submit" :disabled="!isPhoneNumberValid">
+        <div class="name-section">
+          <div class="name-row">
+            <div class="form-group">
+              <label for="firstName">نام</label>
+              <input
+                type="text"
+                id="firstName"
+                v-model="firstName"
+                placeholder="نام خود را وارد کنید"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="lastName">نام خانوادگی</label>
+              <input
+                type="text"
+                id="lastName"
+                v-model="lastName"
+                placeholder="نام خانوادگی خود را وارد کنید"
+                required
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="terms-section">
+          <div class="form-group-checkbox">
+            <input
+              type="checkbox"
+              id="acceptTerms"
+              v-model="acceptTerms"
+              required
+            />
+            <label for="acceptTerms">قوانین و مقررات را می‌پذیرم</label>
+          </div>
+        </div>
+
+        <button @click="proceedToPayment" class="btn btn-submit" :disabled="!isFormValid">
           پرداخت و ثبت‌نام نهایی
         </button>
       </div>
@@ -198,14 +256,43 @@ function proceedToPayment() {
   margin-top: 10px;
 }
 .discount-section,
-.phone-section {
+.phone-section,
+.name-section,
+.terms-section {
   margin-bottom: 30px;
 }
 .discount-section label,
-.phone-section label {
+.phone-section label,
+.name-section label {
   display: block;
   font-weight: 500;
   margin-bottom: 10px;
+}
+
+.name-row {
+  display: flex;
+  gap: 15px;
+}
+
+.name-row .form-group {
+  flex: 1;
+}
+
+.form-group-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.form-group-checkbox input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.form-group-checkbox label {
+  cursor: pointer;
+  margin-bottom: 0;
 }
 .input-group {
   display: flex;

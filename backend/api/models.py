@@ -75,6 +75,7 @@ class Apollonyar(models.Model):
 
 class Course(models.Model):
     name = models.CharField(max_length=100, verbose_name="نام دوره")
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="قیمت کل دوره")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="زمان به‌روزرسانی")
 
@@ -83,19 +84,36 @@ class Course(models.Model):
 
 class Term(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='terms', verbose_name="دوره")
-    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="قیمت")
     name = models.CharField(max_length=100, verbose_name="نام ترم")
     start_date = models.DateField(verbose_name="تاریخ شروع")
     end_date = models.DateField(verbose_name="تاریخ پایان")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="زمان به‌روزرسانی")
 
+    class Meta:
+        unique_together = ('course', 'name')
+
     def __str__(self):
         return f"{self.course.name} - {self.name}"
 
 class Group(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='groups', verbose_name="دوره", null=True, blank=True)
     term = models.ForeignKey(Term, on_delete=models.CASCADE, related_name='groups', verbose_name="ترم")
     title = models.CharField(max_length=100, verbose_name="عنوان گروه")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="زمان به‌روزرسانی")
+
+    def __str__(self):
+        return self.title
+
+class AssignmentFile(models.Model):
+    """
+    مدل برای مدیریت فایل‌های از پیش تعریف شده تکالیف.
+    این فایل‌ها در پنل ادمین آپلود می‌شوند و سپس به تکالیف لینک داده می‌شوند.
+    """
+    title = models.CharField(max_length=200, unique=True, verbose_name="عنوان فایل")
+    file = models.FileField(upload_to='assignment_files/', verbose_name="فایل")
+    description = models.TextField(blank=True, null=True, verbose_name="توضیحات")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="زمان به‌روزرسانی")
 
@@ -107,6 +125,7 @@ class AssignmentDef(models.Model):
     title = models.CharField(max_length=200, verbose_name="عنوان تکلیف")
     deadline = models.DateTimeField(verbose_name="مهلت ارسال")
     is_required = models.BooleanField(default=True, verbose_name="آیا الزامی است؟")
+    assignment_files = models.ManyToManyField(AssignmentFile, blank=True, related_name='assignment_defs', verbose_name="فایل‌های تکلیف")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="زمان به‌روزرسانی")
 
@@ -163,7 +182,7 @@ class Profile(models.Model):
 class MedalDef(models.Model):
     title = models.CharField(max_length=100, verbose_name="عنوان مدال")
     description = models.TextField(verbose_name="توضیحات")
-    icon = models.FileField(upload_to='medal_icons/', verbose_name="آیکون SVG")
+    icon = models.CharField(max_length=100, default='fa-solid fa-award', verbose_name="آیکون FontAwesome")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="زمان به‌روزرسانی")
 
@@ -181,8 +200,9 @@ class Medal(models.Model):
 
 class DiscountCode(models.Model):
     code = models.CharField(max_length=50, unique=True, verbose_name="کد تخفیف")
-    cash_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="تخفیف نقدی")
-    installment_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="تخفیف قسطی")
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='discount_codes', verbose_name="دوره", null=True, blank=True)
+    final_cash_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="قیمت نهایی نقدی با تخفیف")
+    final_installment_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="قیمت نهایی قسطی با تخفیف")
     max_usage = models.PositiveIntegerField(default=1, verbose_name="حداکثر استفاده")
     expiration_date = models.DateTimeField(null=True, blank=True, verbose_name="تاریخ انقضا")
     usage_count = models.PositiveIntegerField(default=0, verbose_name="تعداد استفاده شده")
@@ -275,6 +295,7 @@ class Call(models.Model):
 
 class Note(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='general_notes', verbose_name="پروفایل")
+    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="دوره")
     author_apollonyar = models.ForeignKey(Apollonyar, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="نویسنده")
     note = models.TextField(verbose_name="یادداشت")
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name="زمان")
@@ -283,6 +304,7 @@ class Note(models.Model):
 
 class Log(models.Model):
     action = models.CharField(max_length=255, verbose_name="اقدام")
+    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="دوره")
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name="زمان")
     issuer_apollonyar = models.ForeignKey(Apollonyar, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="انجام دهنده")
     description = models.TextField(blank=True, null=True, verbose_name="توضیحات")

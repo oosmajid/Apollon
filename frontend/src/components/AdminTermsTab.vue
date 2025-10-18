@@ -6,22 +6,24 @@ import dayjs from 'dayjs'
 import jalali from 'dayjs-jalali'
 import api from '@/services/api'
 
-// فعال‌سازی پلاگین جلالی برای کار با تاریخ‌ها
 dayjs.extend(jalali)
 dayjs.locale('fa')
 
 const terms = ref([])
 const courses = ref([])
+const assignmentFiles = ref([])
 
 // Load data on mount
 onMounted(async () => {
   try {
-    const [termsRes, coursesRes] = await Promise.all([
+    const [termsRes, coursesRes, filesRes] = await Promise.all([
       api.getTerms(),
-      api.getCourses()
+      api.getCourses(),
+      api.getAssignmentFiles()
     ])
-    terms.value = termsRes.data
-    courses.value = coursesRes.data
+    terms.value = termsRes.data?.results || termsRes.data || []
+    courses.value = coursesRes.data?.results || coursesRes.data || []
+    assignmentFiles.value = filesRes.data?.results || filesRes.data || []
   } catch (error) {
     console.error("Failed to fetch data:", error)
   }
@@ -35,7 +37,6 @@ const isEditMode = ref(false)
 // --- داده‌های ترم فعلی ---
 const currentTerm = ref(null)
 
-// --- لیست دوره‌ها برای دراپ‌다운 ---
 // Transform terms data for table display
 const termsForTable = computed(() => {
   return terms.value.map(term => ({
@@ -50,16 +51,17 @@ function openAddModal() {
   isEditMode.value = false
   currentTerm.value = {
     name: '',
-    courseId: courses.value.length > 0 ? courses.value[0].id : '',
-    startDate: '',
-    endDate: '',
+    course: courses.value.length > 0 ? courses.value[0].id : null,
+    start_date: '',
+    end_date: '',
+    assignmentsDef: [],
+    callsDef: [],
   }
   showTermModal.value = true
 }
 
 function openEditModal(term) {
   isEditMode.value = true
-  // کپی عمیق برای جلوگیری از تغییر ناخواسته
   const termCopy = JSON.parse(JSON.stringify(term))
 
   // تابع کمکی برای تبدیل تاریخ فارسی به فرمت استاندارد YYYY-MM-DD
@@ -67,16 +69,8 @@ function openEditModal(term) {
     if (!persianDate) return ''
     try {
       const persianMap = {
-        '۰': '0',
-        '۱': '1',
-        '۲': '2',
-        '۳': '3',
-        '۴': '4',
-        '۵': '5',
-        '۶': '6',
-        '۷': '7',
-        '۸': '8',
-        '۹': '9',
+        '۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4',
+        '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9',
       }
       const normalizedDate = String(persianDate).replace(/[۰-۹]/g, (d) => persianMap[d])
       const parsedDate = dayjs(normalizedDate, 'YYYY/MM/DD', 'fa')
@@ -89,25 +83,112 @@ function openEditModal(term) {
 
   currentTerm.value = {
     ...termCopy,
-    startDate: formatToInputDate(termCopy.startDate),
-    endDate: formatToInputDate(termCopy.endDate),
+    course: termCopy.course?.id || termCopy.course,
+    start_date: formatToInputDate(termCopy.start_date || termCopy.startDate),
+    end_date: formatToInputDate(termCopy.end_date || termCopy.endDate),
+    assignmentsDef: termCopy.assignment_defs || termCopy.assignmentsDef || [],
+    callsDef: termCopy.call_defs || termCopy.callsDef || [],
   }
   showTermModal.value = true
+}
+
+// --- توابع مدیریت تکالیف ---
+function addAssignment() {
+  if (!currentTerm.value.assignmentsDef) {
+    currentTerm.value.assignmentsDef = []
+  }
+  currentTerm.value.assignmentsDef.push({
+    id: `new_a_${Date.now()}`,
+    title: '',
+    deadline: '',
+    is_required: true,
+    assignment_files: [],
+  })
+}
+
+function removeAssignment(index) {
+  currentTerm.value.assignmentsDef.splice(index, 1)
+}
+
+// --- توابع مدیریت تماس‌ها ---
+function addCall() {
+  if (!currentTerm.value.callsDef) {
+    currentTerm.value.callsDef = []
+  }
+  currentTerm.value.callsDef.push({
+    id: `new_c_${Date.now()}`,
+    title: '',
+    start_due_date: '',
+    end_due_date: '',
+  })
+}
+
+function removeCall(index) {
+  currentTerm.value.callsDef.splice(index, 1)
 }
 
 // --- توابع ثبت و حذف ---
 async function handleSubmit() {
   try {
+    // آماده‌سازی داده‌ها برای ارسال
+    const termData = {
+      name: currentTerm.value.name,
+      course: currentTerm.value.course,
+      start_date: currentTerm.value.start_date,
+      end_date: currentTerm.value.end_date,
+    }
+
+    let savedTerm
     if (isEditMode.value) {
-      await api.updateTerm(currentTerm.value.id, currentTerm.value)
+      const response = await api.updateTerm(currentTerm.value.id, termData)
+      savedTerm = response.data
       console.log('Term updated successfully')
     } else {
-      await api.createTerm(currentTerm.value)
+      const response = await api.createTerm(termData)
+      savedTerm = response.data
       console.log('Term created successfully')
     }
+
+    // ذخیره تکالیف
+    if (currentTerm.value.assignmentsDef && currentTerm.value.assignmentsDef.length > 0) {
+      for (const assignment of currentTerm.value.assignmentsDef) {
+        const assignmentData = {
+          term: savedTerm.id,
+          title: assignment.title,
+          deadline: assignment.deadline,
+          is_required: assignment.is_required,
+          assignment_files: assignment.assignment_files,
+        }
+
+        if (assignment.id && !assignment.id.toString().startsWith('new_')) {
+          await api.updateAssignmentDef(assignment.id, assignmentData)
+        } else if (assignment.title) {
+          await api.createAssignmentDef(assignmentData)
+        }
+      }
+    }
+
+    // ذخیره تماس‌ها
+    if (currentTerm.value.callsDef && currentTerm.value.callsDef.length > 0) {
+      for (const call of currentTerm.value.callsDef) {
+        const callData = {
+          term: savedTerm.id,
+          title: call.title,
+          start_due_date: call.start_due_date,
+          end_due_date: call.end_due_date,
+        }
+
+        if (call.id && !call.id.toString().startsWith('new_')) {
+          await api.updateCallDef(call.id, callData)
+        } else if (call.title) {
+          await api.createCallDef(callData)
+        }
+      }
+    }
+
     // Refresh terms data
     const response = await api.getTerms()
-    terms.value = response.data
+    terms.value = response.data?.results || response.data || []
     showTermModal.value = false
   } catch (error) {
     console.error('Failed to save term:', error)
@@ -121,7 +202,7 @@ async function handleDeleteTerm() {
     console.log('Term deleted successfully')
     // Refresh terms data
     const response = await api.getTerms()
-    terms.value = response.data
+    terms.value = response.data?.results || response.data || []
     showDeleteModal.value = false
     showTermModal.value = false
   } catch (error) {
@@ -162,7 +243,7 @@ const tableColumns = [
       </template>
     </BaseTable>
 
-    <BaseModal :show="showTermModal" @close="showTermModal = false" size="lg">
+    <BaseModal :show="showTermModal" @close="showTermModal = false" size="xl">
       <template #header>
         <h2>{{ modalTitle }}</h2>
       </template>
@@ -175,12 +256,13 @@ const tableColumns = [
 
         <div class="form-group">
           <label for="course-select">دوره</label>
-          <select id="course-select" v-model="currentTerm.courseId" required>
+          <select id="course-select" v-model="currentTerm.course" required>
             <option v-for="course in courses" :key="course.id" :value="course.id">
               {{ course.name }}
             </option>
           </select>
         </div>
+
 
         <div class="form-grid">
           <div class="form-group">
@@ -188,7 +270,7 @@ const tableColumns = [
             <input
               type="date"
               id="start-date"
-              v-model="currentTerm.startDate"
+              v-model="currentTerm.start_date"
               class="native-date-picker"
               required
             />
@@ -198,10 +280,135 @@ const tableColumns = [
             <input
               type="date"
               id="end-date"
-              v-model="currentTerm.endDate"
+              v-model="currentTerm.end_date"
               class="native-date-picker"
               required
             />
+          </div>
+        </div>
+
+        <!-- بخش تکالیف -->
+        <div class="definition-section bg-soft">
+          <div class="definition-header">
+            <h4>تکالیف ترم</h4>
+            <button @click="addAssignment" type="button" class="btn-sm btn-outline">
+              <i class="fa-solid fa-plus"></i> افزودن تکلیف
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="definition-table">
+              <thead>
+                <tr>
+                  <th>عنوان تکلیف</th>
+                  <th>مهلت ارسال</th>
+                  <th>الزامی</th>
+                  <th>فایل‌ها</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(assignment, index) in currentTerm.assignmentsDef"
+                  :key="assignment.id"
+                >
+                  <td>
+                    <input
+                      type="text"
+                      v-model="assignment.title"
+                      placeholder="مثلا: تکلیف هفته اول"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="datetime-local"
+                      v-model="assignment.deadline"
+                    />
+                  </td>
+                  <td style="text-align: center;">
+                    <input
+                      type="checkbox"
+                      v-model="assignment.is_required"
+                    />
+                  </td>
+                  <td>
+                    <select v-model="assignment.assignment_files" multiple style="min-height: 80px;">
+                      <option v-for="file in assignmentFiles" :key="file.id" :value="file.id">
+                        {{ file.title }}
+                      </option>
+                    </select>
+                  </td>
+                  <td>
+                    <button
+                      @click="removeAssignment(index)"
+                      type="button"
+                      class="btn-sm btn-icon-only btn-danger"
+                      title="حذف تکلیف"
+                    >
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr
+                  v-if="!currentTerm.assignmentsDef || currentTerm.assignmentsDef.length === 0"
+                >
+                  <td colspan="5" class="empty-state">هنوز تکلیفی تعریف نشده است.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- بخش تماس‌ها -->
+        <div class="definition-section bg-soft">
+          <div class="definition-header">
+            <h4>تماس‌های ترم</h4>
+            <button @click="addCall" type="button" class="btn-sm btn-outline">
+              <i class="fa-solid fa-plus"></i> افزودن تماس
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="definition-table">
+              <thead>
+                <tr>
+                  <th>موضوع تماس</th>
+                  <th>تاریخ شروع</th>
+                  <th>تاریخ پایان</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(call, index) in currentTerm.callsDef" :key="call.id">
+                  <td>
+                    <input type="text" v-model="call.title" placeholder="مثلا: تماس هفته اول" />
+                  </td>
+                  <td>
+                    <input
+                      type="datetime-local"
+                      v-model="call.start_due_date"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="datetime-local"
+                      v-model="call.end_due_date"
+                    />
+                  </td>
+                  <td>
+                    <button
+                      @click="removeCall(index)"
+                      type="button"
+                      class="btn-sm btn-icon-only btn-danger"
+                      title="حذف تماس"
+                    >
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr v-if="!currentTerm.callsDef || currentTerm.callsDef.length === 0">
+                  <td colspan="4" class="empty-state">هنوز تماسی تعریف نشده است.</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -275,6 +482,79 @@ const tableColumns = [
   text-align: right;
 }
 
+.definition-section {
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.bg-soft {
+  background-color: var(--background-color);
+}
+
+.definition-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.definition-header h4 {
+  margin: 0;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.definition-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.definition-table th,
+.definition-table td {
+  padding: 10px;
+  text-align: right;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.definition-table thead th {
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  background-color: var(--surface-color);
+}
+
+.definition-table input,
+.definition-table select,
+.definition-table textarea {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background-color: var(--surface-color);
+}
+
+.definition-table td {
+  min-width: 150px;
+}
+
+.definition-table td:last-child {
+  width: 50px;
+  min-width: 50px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 20px !important;
+}
+
 .modal-actions {
   display: flex;
   gap: 10px;
@@ -282,6 +562,7 @@ const tableColumns = [
   border-top: 1px solid var(--border-color);
   padding-top: 20px;
 }
+
 .modal-actions .btn,
 .modal-actions .btn-outline {
   width: auto;
@@ -293,19 +574,40 @@ const tableColumns = [
   border: 1px solid var(--border-color);
   color: var(--text-primary);
 }
+
 .btn-outline:hover {
   background-color: var(--background-color);
 }
+
 .btn-danger-outline {
   background-color: transparent;
   border: 1px solid var(--danger-color);
   color: var(--danger-color);
 }
+
 .btn-danger-outline:hover {
   background-color: var(--danger-color);
   color: #fff;
 }
+
 .btn-danger {
+  background-color: var(--danger-color);
+  color: #fff;
+}
+
+.btn-icon-only {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 1rem;
+}
+
+.btn-icon-only.btn-danger {
+  background-color: transparent;
+  color: var(--danger-color);
+}
+
+.btn-icon-only.btn-danger:hover {
   background-color: var(--danger-color);
   color: #fff;
 }

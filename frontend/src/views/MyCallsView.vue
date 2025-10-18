@@ -6,17 +6,46 @@ import { useLayoutStore } from '@/stores/layout.js';
 import api from '@/services/api'
 
 const layoutStore = useLayoutStore();
-const calls = ref([])
+const calls = ref([]);
+const pagination = ref({
+  page: 1,
+  pageSize: 20,
+  total: 0,
+  totalPages: 0
+});
+const loading = ref(false);
+
+async function loadCalls(page = 1) {
+  loading.value = true;
+  try {
+    const params = {
+      page,
+      page_size: pagination.value.pageSize,
+    };
+
+    const response = await api.getCalls(params);
+
+    // فرمت پاسخ Django pagination
+    calls.value = response.data.results || response.data;
+    pagination.value.total = response.data.count || calls.value.length;
+    pagination.value.page = page;
+    pagination.value.totalPages = Math.ceil(pagination.value.total / pagination.value.pageSize);
+  } catch (error) {
+    console.error("Failed to fetch calls:", error);
+  } finally {
+    loading.value = false;
+  }
+}
+
 onMounted(async () => {
     layoutStore.setPageTitle('تماس‌های من');
-    try {
-        // فرض می‌کنیم API برای تماس‌ها در آینده فیلتر بر اساس آپولون‌یار را پشتیبانی خواهد کرد
-        const response = await api.getCalls(); // یا یک API اختصاصی مانند getMyCalls
-        calls.value = response.data;
-    } catch (error) {
-        console.error("Failed to fetch calls:", error);
-    }
+    await loadCalls();
 });
+
+// تابع تغییر صفحه
+function handlePageChange(page) {
+  loadCalls(page);
+}
 
 
 const tableColumns = [
@@ -38,7 +67,16 @@ const tableColumns = [
 
 <template>
   <div class="view-container">
-    <BaseTable :columns="tableColumns" :data="calls" :rows-per-page="20">
+    <BaseTable
+      :columns="tableColumns"
+      :data="calls"
+      :rows-per-page="pagination.pageSize"
+      :server-side="true"
+      :total-items="pagination.total"
+      :current-page="pagination.page"
+      :loading="loading"
+      @page-change="handlePageChange"
+    >
       <template #cell-actions="{ item }">
         <RouterLink :to="{ name: 'student-profile', params: { id: item.studentId } }" class="btn-sm btn-icon-only" title="مشاهده پروفایل">
           <i class="fa-solid fa-user"></i>

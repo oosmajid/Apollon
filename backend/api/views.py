@@ -12,7 +12,7 @@ from .serializers import (
     MyTokenObtainPairSerializer, OTPRequestSerializer, OTPVerifySerializer,
     UserRegistrationSerializer, CourseSerializer, TermSerializer,
     ApollonyarSerializer, GroupSerializer, MedalDefSerializer, DiscountCodeSerializer,
-    AssignmentDefSerializer, CallDefSerializer, ProfileSerializer,
+    AssignmentDefSerializer, AssignmentFileSerializer, CallDefSerializer, ProfileSerializer,
     AssignmentSerializer, CallSerializer, NoteSerializer,
     CallCreateSerializer, NoteCreateSerializer,
     AssignmentSubmissionCreateSerializer, AssignmentGradeSerializer,
@@ -20,7 +20,7 @@ from .serializers import (
     )
 from .models import (
     User, OTPCode, Course, Term, Apollonyar, Group,
-    MedalDef, DiscountCode, AssignmentDef, CallDef, Profile,
+    MedalDef, DiscountCode, AssignmentDef, AssignmentFile, CallDef, Profile,
     Assignment, AssignmentSubmission, Transaction, Installment, Call, Log
     )
 
@@ -70,7 +70,7 @@ def get_apollonyar_for_user(user):
     from .models import Apollonyar
     return Apollonyar.objects.first()
 
-def log_action(apollonyar, action, description=""):
+def log_action(apollonyar, action, description="", course=None):
     """
     ثبت یک اقدام در جدول لاگ
     """
@@ -78,7 +78,8 @@ def log_action(apollonyar, action, description=""):
     Log.objects.create(
         action=action,
         issuer_apollonyar=apollonyar,
-        description=description
+        description=description,
+        course=course
     )
 
 class OTPRequestView(generics.GenericAPIView):
@@ -176,32 +177,32 @@ class CourseViewSet(viewsets.ModelViewSet):
     یک ViewSet کامل برای مشاهده و ویرایش دوره‌ها.
     این ViewSet به صورت خودکار عملیات list, create, retrieve, update, destroy را فراهم می‌کند.
     """
-    queryset = Course.objects.all()
+    queryset = Course.objects.all().order_by('-created_at')
     serializer_class = CourseSerializer
     # تغییر: هر کاربر احراز هویت شده دسترسی دارد
-    permission_classes = [permissions.IsAuthenticated] 
+    permission_classes = [permissions.IsAuthenticated]
 
 class TermViewSet(viewsets.ModelViewSet):
     """API برای مدیریت ترم‌ها"""
-    queryset = Term.objects.all()
+    queryset = Term.objects.all().order_by('-created_at')
     serializer_class = TermSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 class ApollonyarViewSet(viewsets.ModelViewSet):
     """API برای مدیریت آپولون‌یارها"""
-    queryset = Apollonyar.objects.all()
+    queryset = Apollonyar.objects.all().order_by('-created_at')
     serializer_class = ApollonyarSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 class GroupViewSet(viewsets.ModelViewSet):
     """API برای مدیریت گروه‌ها"""
-    queryset = Group.objects.all()
+    queryset = Group.objects.all().order_by('-created_at')
     serializer_class = GroupSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 class MedalDefViewSet(viewsets.ModelViewSet):
     """API برای مدیریت تعاریف مدال‌ها"""
-    queryset = MedalDef.objects.all()
+    queryset = MedalDef.objects.all().order_by('-created_at')
     serializer_class = MedalDefSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -209,6 +210,12 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
     """API برای مدیریت کدهای تخفیف"""
     queryset = DiscountCode.objects.all()
     serializer_class = DiscountCodeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class AssignmentFileViewSet(viewsets.ModelViewSet):
+    """API برای مدیریت فایل‌های تکالیف"""
+    queryset = AssignmentFile.objects.all()
+    serializer_class = AssignmentFileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 class AssignmentDefViewSet(viewsets.ModelViewSet):
@@ -226,10 +233,93 @@ class CallDefViewSet(viewsets.ModelViewSet):
 class ProfileViewSet(viewsets.ModelViewSet):
     """API برای مشاهده و مدیریت پروفایل هنرجویان"""
     queryset = Profile.objects.select_related(
-        'user', 'course', 'term', 'group', 'apollonyar', 'sales_representative'
+        'user', 'term__course', 'group', 'apollonyar', 'sales_representative'
     ).all()
     serializer_class = ProfileSerializer
     permission_classes = [permissions.IsAuthenticated] # تغییر: هر کاربر احراز هویت شده دسترسی دارد
+
+    # فیلدهای قابل جستجو
+    search_fields = [
+        'user__first_name',
+        'user__last_name',
+        'user__phone_number',
+        'term__name',
+        'term__course__name',
+        'apollonyar__first_name',
+        'apollonyar__last_name',
+    ]
+
+    # فیلدهای قابل مرتب‌سازی
+    ordering_fields = [
+        'user__first_name',
+        'user__last_name',
+        'term__name',
+        'term__course__name',
+        'apollonyar__first_name',
+        'status',
+        'type',
+        'hearts',
+        'stars',
+        'created_at',
+    ]
+
+    # مرتب‌سازی پیش‌فرض
+    ordering = ['-created_at']
+
+    def update(self, request, *args, **kwargs):
+        """
+        ویرایش پروفایل هنرجو.
+        این متد برای به‌روزرسانی اطلاعات پایه پروفایل و اطلاعات user مربوطه استفاده می‌شود.
+        """
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+
+        # استخراج فیلدهایی که باید در user به‌روزرسانی شوند
+        user_data = {}
+
+        # پشتیبانی از firstName و lastName (روش جدید)
+        if 'firstName' in request.data:
+            user_data['first_name'] = request.data['firstName'].strip()
+
+        if 'lastName' in request.data:
+            user_data['last_name'] = request.data['lastName'].strip()
+
+        # پشتیبانی از name (روش قدیمی برای سازگاری با گذشته)
+        if 'name' in request.data and 'firstName' not in request.data:
+            # تقسیم نام کامل به نام و نام خانوادگی
+            name_parts = request.data['name'].strip().split(' ', 1)
+            user_data['first_name'] = name_parts[0]
+            user_data['last_name'] = name_parts[1] if len(name_parts) > 1 else ''
+
+        if 'phone' in request.data:
+            user_data['phone_number'] = request.data['phone']
+
+        if 'birthYear' in request.data:
+            # تبدیل سال تولد به تاریخ
+            from datetime import date
+            birth_year = int(request.data['birthYear'])
+            user_data['birthday'] = date(birth_year, 1, 1)
+
+        if 'city' in request.data:
+            user_data['city'] = request.data['city']
+
+        # به‌روزرسانی اطلاعات user
+        if user_data and instance.user:
+            for key, value in user_data.items():
+                setattr(instance.user, key, value)
+            instance.user.save()
+
+        # به‌روزرسانی سایر فیلدهای profile (در صورت وجود)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
+
+    def partial_update(self, request, *args, **kwargs):
+        """برای پشتیبانی از PATCH requests"""
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
 
     # === اکشن جدید برای دریافت تکالیف ===
     @action(detail=True, methods=['get'])
@@ -683,10 +773,28 @@ class AssignmentViewSet(viewsets.ReadOnlyModelViewSet):
     API برای مشاهده تکالیف.
     فقط خواندنی است چون تکالیف به صورت خودکار برای هنرجویان ساخته می‌شوند.
     """
-    queryset = Assignment.objects.all()
+    queryset = Assignment.objects.select_related(
+        'profile__user', 'assignment_def', 'profile__term__course'
+    ).all()
     serializer_class = AssignmentSerializer
     # در فاز بعدی دسترسی‌ها را دقیق‌تر می‌کنیم (فقط هنرجوی مربوطه یا ادمین)
     permission_classes = [permissions.IsAuthenticated]
+
+    # فیلدهای قابل جستجو
+    search_fields = [
+        'profile__user__first_name',
+        'profile__user__last_name',
+        'assignment_def__title',
+    ]
+
+    # فیلدهای قابل مرتب‌سازی
+    ordering_fields = [
+        'deadline',
+        'status',
+    ]
+
+    # مرتب‌سازی پیش‌فرض
+    ordering = ['-deadline']
 
     # اکشن سفارشی برای ارسال یک تکلیف جدید
     @action(detail=True, methods=['post'])
@@ -776,6 +884,27 @@ class TransactionViewSet(viewsets.ModelViewSet):
     serializer_class = TransactionSerializer
     permission_classes = [permissions.IsAuthenticated] # تغییر: هر کاربر احراز هویت شده دسترسی دارد
 
+    # فیلدهای قابل جستجو
+    search_fields = [
+        'target_user__first_name',
+        'target_user__last_name',
+        'target_user__phone_number',
+        'type',
+        'payment_method',
+    ]
+
+    # فیلدهای قابل مرتب‌سازی
+    ordering_fields = [
+        'timestamp',
+        'amount',
+        'type',
+        'verification_status',
+        'payment_method',
+    ]
+
+    # مرتب‌سازی پیش‌فرض
+    ordering = ['-timestamp']
+
     @action(detail=True, methods=['post'])
     def verify(self, request, pk=None):
         """
@@ -800,10 +929,27 @@ class TransactionViewSet(viewsets.ModelViewSet):
 class InstallmentViewSet(viewsets.ModelViewSet):
     """API برای مدیریت اقساط."""
     queryset = Installment.objects.select_related(
-        'profile__user', 'profile__course', 'transaction'
+        'profile__user', 'profile__term__course', 'transaction'
     ).all()
     serializer_class = InstallmentSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    # فیلدهای قابل جستجو
+    search_fields = [
+        'profile__user__first_name',
+        'profile__user__last_name',
+        'profile__user__phone_number',
+    ]
+
+    # فیلدهای قابل مرتب‌سازی
+    ordering_fields = [
+        'due_date',
+        'due_amount',
+        'status',
+    ]
+
+    # مرتب‌سازی پیش‌فرض
+    ordering = ['due_date']
 
 class CallViewSet(viewsets.ReadOnlyModelViewSet):
     """API برای مشاهده تماس‌ها."""
@@ -812,3 +958,19 @@ class CallViewSet(viewsets.ReadOnlyModelViewSet):
     ).all()
     serializer_class = CallSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    # فیلدهای قابل جستجو
+    search_fields = [
+        'profile__user__first_name',
+        'profile__user__last_name',
+        'type',
+    ]
+
+    # فیلدهای قابل مرتب‌سازی
+    ordering_fields = [
+        'call_timestamp',
+        'type',
+    ]
+
+    # مرتب‌سازی پیش‌فرض
+    ordering = ['-call_timestamp']

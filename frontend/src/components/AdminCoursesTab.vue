@@ -8,11 +8,27 @@ const courses = ref([])
 
 // Load courses data on mount
 onMounted(async () => {
+  console.log('[AdminCoursesTab] Mounting component...')
   try {
+    console.log('[AdminCoursesTab] Fetching courses...')
     const response = await api.getCourses()
-    courses.value = response.data
+    console.log('[AdminCoursesTab] Response received:', response)
+    console.log('[AdminCoursesTab] Response data:', response.data)
+
+    // Check if response.data is paginated (has 'results' key) or direct array
+    if (response.data && response.data.results) {
+      courses.value = response.data.results
+      console.log('[AdminCoursesTab] Using paginated data, courses count:', courses.value.length)
+    } else if (Array.isArray(response.data)) {
+      courses.value = response.data
+      console.log('[AdminCoursesTab] Using direct array, courses count:', courses.value.length)
+    } else {
+      console.error('[AdminCoursesTab] Unexpected response format:', response.data)
+      courses.value = []
+    }
   } catch (error) {
-    console.error("Failed to fetch courses:", error)
+    console.error("[AdminCoursesTab] Failed to fetch courses:", error)
+    console.error("[AdminCoursesTab] Error details:", error.response?.data || error.message)
   }
 })
 
@@ -38,10 +54,9 @@ const coursesForTable = computed(() => {
 // --- ستون‌های جدول اصلی ---
 const tableColumns = [
   { key: 'name', label: 'نام دوره', sortable: true, filterable: true },
+  { key: 'total_price', label: 'قیمت کل', sortable: true, filterable: false },
   { key: 'totalStudents', label: 'تعداد کل هنرجویان', sortable: true, filterable: false },
   { key: 'graduates', label: 'تعداد فارغ‌التحصیلان', sortable: true, filterable: false },
-  { key: 'assignmentCount', label: 'تعداد تکالیف', sortable: true, filterable: false },
-  { key: 'callCount', label: 'تعداد تماس‌ها', sortable: true, filterable: false },
   { key: 'actions', label: '', sortable: false, filterable: false },
 ]
 
@@ -50,8 +65,7 @@ function openAddModal() {
   isEditMode.value = false
   currentCourse.value = {
     name: '',
-    assignmentsDef: [],
-    callsDef: [],
+    total_price: null,
   }
   showCourseModal.value = true
 }
@@ -171,125 +185,15 @@ const modalTitle = computed(() => {
           />
         </div>
 
-        <div class="definition-section bg-soft">
-          <div class="definition-header">
-            <h4>تکالیف دوره</h4>
-            <button @click="addAssignment" class="btn-sm btn-outline">
-              <i class="fa-solid fa-plus"></i> افزودن تکلیف
-            </button>
-          </div>
-          <div class="table-responsive">
-            <table class="definition-table">
-              <thead>
-                <tr>
-                  <th>نام تکلیف</th>
-                  <th>توضیحات</th>
-                  <th>فایل‌های الگو</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="(assignment, index) in currentCourse.assignmentsDef"
-                  :key="assignment.id"
-                >
-                  <td>
-                    <input
-                      type="text"
-                      v-model="assignment.title"
-                      placeholder="مثلا: کار با لایه‌ها"
-                    />
-                  </td>
-                  <td>
-                    <textarea
-                      v-model="assignment.description"
-                      rows="2"
-                      placeholder="توضیحات برای هنرجو"
-                    ></textarea>
-                  </td>
-                  <td>
-                    <div class="file-upload-wrapper">
-                      <label
-                        :for="`file-upload-${index}`"
-                        class="btn-sm btn-icon-only"
-                        title="آپلود فایل"
-                      >
-                        <i class="fa-solid fa-upload"></i>
-                      </label>
-                      <input
-                        type="file"
-                        :id="`file-upload-${index}`"
-                        @change="handleFileUpload($event, assignment)"
-                        multiple
-                        hidden
-                      />
-                      <span>({{ (assignment.files && assignment.files.length) || 0 }} فایل)</span>
-                    </div>
-                  </td>
-                  <td>
-                    <button
-                      @click="removeAssignment(index)"
-                      class="btn-sm btn-icon-only btn-danger"
-                      title="حذف تکلیف"
-                    >
-                      <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                  </td>
-                </tr>
-                <tr
-                  v-if="!currentCourse.assignmentsDef || currentCourse.assignmentsDef.length === 0"
-                >
-                  <td colspan="4" class="empty-state">هنوز تکلیفی تعریف نشده است.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="definition-section bg-soft">
-          <div class="definition-header">
-            <h4>تماس‌های دوره</h4>
-            <button @click="addCall" class="btn-sm btn-outline">
-              <i class="fa-solid fa-plus"></i> افزودن تماس
-            </button>
-          </div>
-          <div class="table-responsive">
-            <table class="definition-table">
-              <thead>
-                <tr>
-                  <th>موضوع تماس</th>
-                  <th>توضیحات داخلی</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(call, index) in currentCourse.callsDef" :key="call.id">
-                  <td>
-                    <input type="text" v-model="call.topic" placeholder="مثلا: تماس هفته اول" />
-                  </td>
-                  <td>
-                    <textarea
-                      v-model="call.description"
-                      rows="2"
-                      placeholder="یادآوری برای آپولون‌یار"
-                    ></textarea>
-                  </td>
-                  <td>
-                    <button
-                      @click="removeCall(index)"
-                      class="btn-sm btn-icon-only btn-danger"
-                      title="حذف تماس"
-                    >
-                      <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                  </td>
-                </tr>
-                <tr v-if="!currentCourse.callsDef || currentCourse.callsDef.length === 0">
-                  <td colspan="3" class="empty-state">هنوز تماسی تعریف نشده است.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        <div class="form-group">
+          <label for="course-price">قیمت کل دوره (تومان)</label>
+          <input
+            type="number"
+            id="course-price"
+            v-model="currentCourse.total_price"
+            class="form-control"
+            placeholder="مثلاً: 5000000"
+          />
         </div>
       </div>
 

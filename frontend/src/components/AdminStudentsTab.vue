@@ -10,17 +10,30 @@ const groups = ref([])
 
 // Load data on mount
 onMounted(async () => {
+  console.log('[AdminStudentsTab] Mounting component...')
   try {
+    console.log('[AdminStudentsTab] Fetching data...')
     const [studentsRes, apollonyarsRes, groupsRes] = await Promise.all([
       api.getProfiles(),
       api.getApollonyars(),
       api.getGroups()
     ])
-    students.value = studentsRes.data
-    apollonyars.value = apollonyarsRes.data
-    groups.value = groupsRes.data
+
+    console.log('[AdminStudentsTab] Students response:', studentsRes)
+    console.log('[AdminStudentsTab] Apollonyars response:', apollonyarsRes)
+    console.log('[AdminStudentsTab] Groups response:', groupsRes)
+
+    // Handle paginated responses
+    students.value = studentsRes.data?.results || studentsRes.data || []
+    apollonyars.value = apollonyarsRes.data?.results || apollonyarsRes.data || []
+    groups.value = groupsRes.data?.results || groupsRes.data || []
+
+    console.log('[AdminStudentsTab] Students count:', students.value.length)
+    console.log('[AdminStudentsTab] Apollonyars count:', apollonyars.value.length)
+    console.log('[AdminStudentsTab] Groups count:', groups.value.length)
   } catch (error) {
-    console.error("Failed to fetch data:", error)
+    console.error("[AdminStudentsTab] Failed to fetch data:", error)
+    console.error("[AdminStudentsTab] Error details:", error.response?.data || error.message)
   }
 })
 

@@ -4,7 +4,7 @@ from django.urls import path, include
 from .views import (
     UserRegistrationView, MyTokenObtainPairView, OTPRequestView, OTPVerifyView, UserMeView,
     CourseViewSet, TermViewSet, ApollonyarViewSet, GroupViewSet, MedalDefViewSet,
-    DiscountCodeViewSet, AssignmentDefViewSet, CallDefViewSet, ProfileViewSet,
+    DiscountCodeViewSet, AssignmentFileViewSet, AssignmentDefViewSet, CallDefViewSet, ProfileViewSet,
     AssignmentViewSet, AssignmentSubmissionViewSet, TransactionViewSet, InstallmentViewSet,
     CallViewSet, LogViewSet
 )
@@ -21,6 +21,7 @@ router.register(r'apollonyars', ApollonyarViewSet, basename='apollonyar')
 router.register(r'groups', GroupViewSet, basename='group')
 router.register(r'medal-defs', MedalDefViewSet, basename='medaldef')
 router.register(r'discounts', DiscountCodeViewSet, basename='discountcode')
+router.register(r'assignment-files', AssignmentFileViewSet, basename='assignmentfile')
 router.register(r'assignment-defs', AssignmentDefViewSet, basename='assignmentdef')
 router.register(r'call-defs', CallDefViewSet, basename='calldef')
 router.register(r'profiles', ProfileViewSet, basename='profile')

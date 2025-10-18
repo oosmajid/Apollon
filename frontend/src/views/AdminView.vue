@@ -6,7 +6,8 @@ import AdminStudentsTab from '@/components/AdminStudentsTab.vue'
 import AdminApollonyarsTab from '@/components/AdminApollonyarsTab.vue'
 import AdminGroupsTab from '@/components/AdminGroupsTab.vue'
 import AdminMedalsTab from '@/components/AdminMedalsTab.vue'
-import AdminDiscountsTab from '@/components/AdminDiscountsTab.vue' // ۱. کامپوننت جدید را import کنید
+import AdminDiscountsTab from '@/components/AdminDiscountsTab.vue'
+import AdminAssignmentFilesTab from '@/components/AdminAssignmentFilesTab.vue'
 import { onMounted } from 'vue'
 import { useLayoutStore } from '@/stores/layout.js'
 
@@ -75,6 +76,13 @@ function setActiveTab(tabName) {
       >
         <i class="fa-solid fa-percent"></i> کدهای تخفیف
       </button>
+      <button
+        @click="setActiveTab('assignment-files')"
+        :class="{ active: activeTab === 'assignment-files' }"
+        class="tab-button"
+      >
+        <i class="fa-solid fa-file-lines"></i> فایل‌های تکالیف
+      </button>
     </nav>
 
     <div class="tabs-content">
@@ -85,6 +93,7 @@ function setActiveTab(tabName) {
       <div v-if="activeTab === 'students'"><AdminStudentsTab /></div>
       <div v-if="activeTab === 'medals'"><AdminMedalsTab /></div>
       <div v-if="activeTab === 'discounts'"><AdminDiscountsTab /></div>
+      <div v-if="activeTab === 'assignment-files'"><AdminAssignmentFilesTab /></div>
     </div>
   </div>
 </template>

@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python manage.py check:*)",
+      "Bash(python3 manage.py check:*)",
+      "Bash(source venv/bin/activate)",
+      "Bash(lsof:*)",
+      "Bash(python3 manage.py runserver:*)",
+      "Bash(curl:*)",
+      "Bash(python3 manage.py shell:*)",
+      "Bash(python3:*)",
+      "Bash(kill:*)",
+      "Bash(git checkout -- backend/api/serializers.py frontend/src/views/StudentSelfProfileView.vue)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

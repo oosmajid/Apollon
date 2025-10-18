@@ -10,7 +10,7 @@ const apollonyars = ref([])
 onMounted(async () => {
   try {
     const response = await api.getApollonyars()
-    apollonyars.value = response.data
+    apollonyars.value = response.data?.results || response.data || []
   } catch (error) {
     console.error("Failed to fetch apollonyars:", error)
   }
@@ -24,7 +24,7 @@ const apollonyarsForTable = computed(() => {
     phone: apollonyar.phone_number,
     telegramId: apollonyar.telegram_id || '-',
     status: apollonyar.is_active ? 'آزاد' : 'مسدود',
-    avgScore: apollonyar.avg_score || 0,
+    activeStudentsCount: apollonyar.activeStudentsCount || 0,
   }))
 })
 
@@ -67,7 +67,7 @@ async function handleSubmit() {
     }
     // Refresh apollonyars data
     const response = await api.getApollonyars()
-    apollonyars.value = response.data
+    apollonyars.value = response.data?.results || response.data || []
     showApollonyarModal.value = false
   } catch (error) {
     console.error('Failed to save apollonyar:', error)
@@ -81,7 +81,7 @@ async function handleDelete() {
     console.log('Apollonyar deleted successfully')
     // Refresh apollonyars data
     const response = await api.getApollonyars()
-    apollonyars.value = response.data
+    apollonyars.value = response.data?.results || response.data || []
     showDeleteModal.value = false
     showApollonyarModal.value = false
   } catch (error) {
@@ -100,7 +100,7 @@ const tableColumns = [
   { key: 'phone', label: 'شماره تلفن', sortable: false, filterable: true },
   { key: 'telegramId', label: 'آیدی تلگرام', sortable: true, filterable: true }, // ستون جدید
   { key: 'status', label: 'دسترسی', sortable: true, filterable: true },
-  { key: 'avgScore', label: 'میانگین امتیاز', sortable: true, filterable: false },
+  { key: 'activeStudentsCount', label: 'هنرجوهای فعال', sortable: true, filterable: false },
   { key: 'actions', label: '', sortable: false, filterable: false },
 ]
 </script>
@@ -123,7 +123,7 @@ const tableColumns = [
           {{ item.status }}
         </span>
       </template>
-      <template #cell-avgScore="{ item }">{{ item.avgScore }} ⭐</template>
+      <template #cell-activeStudentsCount="{ item }">{{ item.activeStudentsCount }}</template>
       <template #cell-actions="{ item }">
         <button @click="openEditModal(item)" class="btn-sm">
           <i class="fa-solid fa-cogs"></i> ویرایش

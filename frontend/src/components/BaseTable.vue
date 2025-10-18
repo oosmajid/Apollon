@@ -10,10 +10,14 @@ const props = defineProps({
   rowsPerPage: { type: Number, default: 10 },
   selectable: { type: Boolean, default: false }, // جدید: فعال‌سازی انتخاب
   modelValue: { type: Array, default: () => [] }, // جدید: v-model برای آیتم‌های انتخاب شده
+  serverSide: { type: Boolean, default: false }, // آیا pagination سمت سرور است؟
+  totalItems: { type: Number, default: 0 }, // تعداد کل آیتم‌ها (برای server-side)
+  currentPage: { type: Number, default: 1 }, // صفحه فعلی (برای server-side)
+  loading: { type: Boolean, default: false }, // آیا در حال بارگذاری است؟
 })
 
-// جدید: تعریف event برای v-model
-const emit = defineEmits(['update:modelValue'])
+// جدید: تعریف event برای v-model و pagination
+const emit = defineEmits(['update:modelValue', 'page-change', 'sort-change', 'filter-change'])
 
 // =================================================================
 // بخش فیلتر کردن پیشرفته
@@ -160,29 +164,49 @@ function getSortDirection(key) {
 // =================================================================
 // بخش صفحه‌بندی (Pagination)
 // =================================================================
-const currentPage = ref(1)
+const internalCurrentPage = ref(1)
+
+// استفاده از currentPage از props اگر server-side باشد، در غیر این صورت از internal استفاده کن
+const activePage = computed(() => {
+  return props.serverSide ? props.currentPage : internalCurrentPage.value
+})
 
 const pageCount = computed(() => {
   if (props.rowsPerPage === 0) return 1
+  if (props.serverSide) {
+    return Math.ceil(props.totalItems / props.rowsPerPage)
+  }
   return Math.ceil(sortedData.value.length / props.rowsPerPage)
 })
 
 const paginatedData = computed(() => {
+  // اگر server-side باشد، داده‌ها از قبل صفحه‌بندی شده‌اند
+  if (props.serverSide) {
+    return sortedData.value
+  }
+
+  // در غیر این صورت، client-side pagination
   if (props.rowsPerPage === 0) return sortedData.value
-  const start = (currentPage.value - 1) * props.rowsPerPage
+  const start = (internalCurrentPage.value - 1) * props.rowsPerPage
   const end = start + props.rowsPerPage
   return sortedData.value.slice(start, end)
 })
 
 function changePage(page) {
   if (page > 0 && page <= pageCount.value) {
-    currentPage.value = page
+    if (props.serverSide) {
+      // برای server-side، event را emit کن
+      emit('page-change', page)
+    } else {
+      // برای client-side، صفحه داخلی را تغییر بده
+      internalCurrentPage.value = page
+    }
   }
 }
 
 watch(pageCount, (newPageCount) => {
-  if (currentPage.value > newPageCount) {
-    currentPage.value = newPageCount || 1
+  if (internalCurrentPage.value > newPageCount) {
+    internalCurrentPage.value = newPageCount || 1
   }
 })
 
@@ -300,24 +324,24 @@ function toggleSelectAll() {
     </div>
 
     <div v-if="pageCount > 1" class="pagination-container">
-      <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" class="page-btn">
+      <button @click="changePage(activePage - 1)" :disabled="activePage === 1" class="page-btn">
         ‹
       </button>
-      <span v-if="pageCount > 5 && currentPage > 3">...</span>
+      <span v-if="pageCount > 5 && activePage > 3">...</span>
       <button
         v-for="page in pageCount"
         :key="page"
-        v-show="Math.abs(page - currentPage) < 2 || page === 1 || page === pageCount"
+        v-show="Math.abs(page - activePage) < 2 || page === 1 || page === pageCount"
         @click="changePage(page)"
         class="page-btn"
-        :class="{ active: currentPage === page }"
+        :class="{ active: activePage === page }"
       >
         {{ page }}
       </button>
-      <span v-if="pageCount > 5 && currentPage < pageCount - 2">...</span>
+      <span v-if="pageCount > 5 && activePage < pageCount - 2">...</span>
       <button
-        @click="changePage(currentPage + 1)"
-        :disabled="currentPage === pageCount"
+        @click="changePage(activePage + 1)"
+        :disabled="activePage === pageCount"
         class="page-btn"
       >
         ›

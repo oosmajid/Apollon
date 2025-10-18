@@ -10,16 +10,56 @@ import api from '@/services/api'
 
 const layoutStore = useLayoutStore()
 const students = ref([])
+const pagination = ref({
+  page: 1,
+  pageSize: 15,
+  total: 0,
+  totalPages: 0
+})
+const loading = ref(false)
+const searchQuery = ref('')
+const ordering = ref('-created_at')
+
+// تابع بارگذاری داده‌ها با pagination
+async function loadStudents(page = 1, search = '', orderBy = '-created_at') {
+  loading.value = true
+  try {
+    const params = {
+      page,
+      page_size: pagination.value.pageSize,
+    }
+
+    if (search) {
+      params.search = search
+    }
+
+    if (orderBy) {
+      params.ordering = orderBy
+    }
+
+    const response = await api.getProfiles(params)
+
+    // فرمت پاسخ Django pagination
+    students.value = response.data.results || response.data
+    pagination.value.total = response.data.count || students.value.length
+    pagination.value.page = page
+    pagination.value.totalPages = Math.ceil(pagination.value.total / pagination.value.pageSize)
+  } catch (error) {
+    console.error("Failed to fetch students:", error)
+  } finally {
+    loading.value = false
+  }
+}
 
 onMounted(async () => {
   layoutStore.setPageTitle('کل هنرجویان')
-  try {
-    const response = await api.getProfiles()
-    students.value = response.data
-  } catch (error) {
-    console.error("Failed to fetch students:", error)
-  }
+  await loadStudents()
 })
+
+// تابع تغییر صفحه
+function handlePageChange(page) {
+  loadStudents(page, searchQuery.value, ordering.value)
+}
 
 // --- منطق مودال افزودن هنرجو ---
 const isAddModalOpen = ref(false)
@@ -41,7 +81,7 @@ async function handleAddStudent() {
       // تبدیل داده‌های فرم به فرمت API
       const [firstName, ...lastNameParts] = newStudent.value.name.split(' ')
       const lastName = lastNameParts.join(' ')
-      
+
       const profileData = {
         user: {
           first_name: firstName,
@@ -51,13 +91,12 @@ async function handleAddStudent() {
         birth_year: newStudent.value.birthYear || null,
         city: newStudent.value.city || null,
       }
-      
+
       await api.createProfile(profileData)
-      
+
       // بارگذاری مجدد لیست هنرجویان
-      const response = await api.getProfiles()
-      students.value = response.data
-      
+      await loadStudents(pagination.value.page, searchQuery.value, ordering.value)
+
       isAddModalOpen.value = false
     } catch (error) {
       console.error("Failed to create student:", error)
@@ -120,7 +159,16 @@ const tableColumns = [
       </button>
     </div>
 
-    <BaseTable :columns="tableColumns" :data="studentsWithDetails" :rows-per-page="15">
+    <BaseTable
+      :columns="tableColumns"
+      :data="studentsWithDetails"
+      :rows-per-page="pagination.pageSize"
+      :server-side="true"
+      :total-items="pagination.total"
+      :current-page="pagination.page"
+      :loading="loading"
+      @page-change="handlePageChange"
+    >
       <template #cell-actions="{ item }">
         <RouterLink
           :to="{ name: 'student-profile', params: { id: item.id } }"

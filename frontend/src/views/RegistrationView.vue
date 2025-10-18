@@ -54,10 +54,10 @@ const uploadedFiles = ref([])
 
 // جدید: computed property برای فیلتر کردن ترم‌ها بر اساس دوره انتخابی
 const availableTerms = computed(() => {
-  if (!formData.value.courseId) {
+  if (!formData.value.courseId || !terms.value) {
     return []
   }
-  return terms.value.filter((term) => term.courseId === formData.value.courseId)
+  return terms.value.filter((term) => term?.courseId === formData.value.courseId)
 })
 
 // جدید: ریست کردن ترم با تغییر دوره
@@ -182,8 +182,8 @@ function handleSubmit() {
               <label for="course" class="form-label">قصد شرکت در کدام دوره را دارید؟</label>
               <select id="course" v-model="formData.courseId" @change="handleCourseChange" required>
                 <option :value="null" disabled>ابتدا دوره را انتخاب کنید...</option>
-                <option v-for="course in courses" :key="course.id" :value="course.id">
-                  {{ course.name }}
+                <option v-for="course in courses" :key="course?.id" :value="course?.id">
+                  {{ course?.name }}
                 </option>
               </select>
             </div>
@@ -191,8 +191,8 @@ function handleSubmit() {
               <label for="term" class="form-label">کدام یک از ترم‌های زیر؟</label>
               <select id="term" v-model="formData.termId" :disabled="!formData.courseId" required>
                 <option :value="null" disabled>ابتدا دوره را انتخاب کنید...</option>
-                <option v-for="term in availableTerms" :key="term.id" :value="term.id">
-                  {{ term.name }} (شروع از {{ term.startDate }})
+                <option v-for="term in availableTerms" :key="term?.id" :value="term?.id">
+                  {{ term?.name }} (شروع از {{ term?.startDate }})
                 </option>
               </select>
             </div>

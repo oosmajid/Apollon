@@ -282,3 +282,6 @@ logs
 # Temporary files
 tmp/
 temp/
+
+
+assignment_files/

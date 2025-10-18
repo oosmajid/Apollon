@@ -28,6 +28,25 @@ apiClient.interceptors.request.use(
     }
 );
 
+// Response interceptor برای مدیریت انقضای session
+apiClient.interceptors.response.use(
+    (response) => {
+        return response;
+    },
+    (error) => {
+        if (error.response?.status === 401) {
+            // اگر session منقضی شده، کاربر را به صفحه لاگین هدایت کن
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+            
+            // هدایت به صفحه لاگین
+            window.location.href = '/login';
+        }
+        return Promise.reject(error);
+    }
+);
+
 export default {
     // --- Auth ---
     loginWithPassword(credentials) {
@@ -77,9 +96,35 @@ export default {
     updateDiscount(discountId, discountData) { return apiClient.patch(`/discounts/${discountId}/`, discountData); },
     deleteDiscount(discountId) { return apiClient.delete(`/discounts/${discountId}/`); },
 
+    // Assignment Files
+    getAssignmentFiles() { return apiClient.get('/assignment-files/'); },
+    createAssignmentFile(fileData) {
+        return apiClient.post('/assignment-files/', fileData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+    },
+    updateAssignmentFile(fileId, fileData) {
+        return apiClient.patch(`/assignment-files/${fileId}/`, fileData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+    },
+    deleteAssignmentFile(fileId) { return apiClient.delete(`/assignment-files/${fileId}/`); },
+
+    // Assignment Definitions
+    getAssignmentDefs() { return apiClient.get('/assignment-defs/'); },
+    createAssignmentDef(defData) { return apiClient.post('/assignment-defs/', defData); },
+    updateAssignmentDef(defId, defData) { return apiClient.patch(`/assignment-defs/${defId}/`, defData); },
+    deleteAssignmentDef(defId) { return apiClient.delete(`/assignment-defs/${defId}/`); },
+
+    // Call Definitions
+    getCallDefs() { return apiClient.get('/call-defs/'); },
+    createCallDef(defData) { return apiClient.post('/call-defs/', defData); },
+    updateCallDef(defId, defData) { return apiClient.patch(`/call-defs/${defId}/`, defData); },
+    deleteCallDef(defId) { return apiClient.delete(`/call-defs/${defId}/`); },
+
     // --- Profiles & Students ---
-    getProfiles() {
-        return apiClient.get('/profiles/');
+    getProfiles(params = {}) {
+        return apiClient.get('/profiles/', { params });
     },
     createProfile(profileData) {
         return apiClient.post('/profiles/', profileData);
@@ -108,8 +153,8 @@ export default {
     addNoteForProfile(profileId, noteData) {
         return apiClient.post(`/profiles/${profileId}/add_note/`, noteData);
     },
-    getAssignments() {
-        return apiClient.get('/assignments/');
+    getAssignments(params = {}) {
+        return apiClient.get('/assignments/', { params });
     },
     submitAssignment(assignmentId, submissionData) {
         // این بخش به دلیل آپلود فایل کمی پیچیده‌تر است و بعدا تکمیل می‌شود
@@ -122,11 +167,11 @@ export default {
     },
 
     // --- Financial ---
-    getTransactions() {
-        return apiClient.get('/transactions/');
+    getTransactions(params = {}) {
+        return apiClient.get('/transactions/', { params });
     },
-    getInstallments() {
-        return apiClient.get('/installments/');
+    getInstallments(params = {}) {
+        return apiClient.get('/installments/', { params });
     },
     verifyTransaction(transactionId, data) {
         return apiClient.patch(`/transactions/${transactionId}/`, data);
@@ -182,8 +227,8 @@ export default {
     },
 
     // --- Additional API functions ---
-    getCalls() {
-        return apiClient.get('/calls/');
+    getCalls(params = {}) {
+        return apiClient.get('/calls/', { params });
     },
     getProfilePayments(profileId) {
         return apiClient.get(`/profiles/${profileId}/payments/`);

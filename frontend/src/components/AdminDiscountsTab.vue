@@ -6,12 +6,17 @@ import dayjs from 'dayjs'
 import api from '@/services/api'
 
 const discounts = ref([])
+const courses = ref([])
 
-// Load discounts data on mount
+// Load discounts and courses data on mount
 onMounted(async () => {
   try {
-    const response = await api.getDiscounts()
-    discounts.value = response.data
+    const [discountsRes, coursesRes] = await Promise.all([
+      api.getDiscounts(),
+      api.getCourses()
+    ])
+    discounts.value = discountsRes.data?.results || discountsRes.data || []
+    courses.value = coursesRes.data?.results || coursesRes.data || []
   } catch (error) {
     console.error("Failed to fetch discounts:", error)
   }
@@ -41,7 +46,9 @@ watch(isExpiryUnlimited, (newVal) => {
 
 const tableColumns = [
   { key: 'code', label: 'کد', sortable: true, filterable: true },
-  { key: 'percentage', label: 'درصد تخفیف', sortable: true },
+  { key: 'courseName', label: 'دوره', sortable: true, filterable: true },
+  { key: 'finalCashPrice', label: 'قیمت نقدی', sortable: true },
+  { key: 'finalInstallmentPrice', label: 'قیمت قسطی', sortable: true },
   { key: 'createdAt', label: 'تاریخ ساخت', sortable: true },
   { key: 'usageCount', label: 'تعداد استفاده', sortable: true },
   { key: 'usageLimit', label: 'سقف استفاده', sortable: true },
@@ -56,7 +63,9 @@ function openAddModal() {
   isExpiryUnlimited.value = true // <-- جدید: پیش‌فرض تاریخ نامحدود است
   currentDiscount.value = {
     code: '',
-    percentage: 10,
+    course: courses.value.length > 0 ? courses.value[0].id : null,
+    final_cash_price: '',
+    final_installment_price: '',
     usageLimit: 100,
     expiresAt: '',
   }
@@ -98,7 +107,7 @@ async function handleSubmit() {
     }
     // Refresh discounts data
     const response = await api.getDiscounts()
-    discounts.value = response.data
+    discounts.value = response.data?.results || response.data || []
     showDiscountModal.value = false
   } catch (error) {
     console.error('Failed to save discount:', error)
@@ -112,7 +121,7 @@ async function handleDelete() {
     console.log('Discount deleted successfully')
     // Refresh discounts data
     const response = await api.getDiscounts()
-    discounts.value = response.data
+    discounts.value = response.data?.results || response.data || []
     showDeleteModal.value = false
     showDiscountModal.value = false
   } catch (error) {
@@ -134,7 +143,8 @@ const modalTitle = computed(() => (isEditMode.value ? 'ویرایش کد تخف�
     </div>
 
     <BaseTable :columns="tableColumns" :data="discounts" :rows-per-page="10">
-      <template #cell-percentage="{ item }">{{ item.percentage }}٪</template>
+      <template #cell-finalCashPrice="{ item }">{{ item.final_cash_price ? item.final_cash_price.toLocaleString() + ' تومان' : '-' }}</template>
+      <template #cell-finalInstallmentPrice="{ item }">{{ item.final_installment_price ? item.final_installment_price.toLocaleString() + ' تومان' : '-' }}</template>
       <template #cell-usageLimit="{ item }">{{ item.usageLimit ?? 'نامحدود' }}</template>
       <template #cell-expiresAt="{ item }">{{ item.expiresAt ?? 'ندارد' }}</template>
       <template #cell-status="{ item }">
@@ -169,14 +179,31 @@ const modalTitle = computed(() => (isEditMode.value ? 'ویرایش کد تخف�
         </div>
 
         <div class="form-group">
-          <label for="percentage">درصد تخفیف: {{ currentDiscount.percentage }}٪</label>
+          <label for="course-select">دوره</label>
+          <select id="course-select" v-model="currentDiscount.course" required>
+            <option v-for="course in courses" :key="course.id" :value="course.id">
+              {{ course.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="final-cash-price">قیمت نهایی نقدی با تخفیف (تومان)</label>
           <input
-            type="range"
-            id="percentage"
-            v-model="currentDiscount.percentage"
-            min="0"
-            max="100"
-            class="slider"
+            type="number"
+            id="final-cash-price"
+            v-model="currentDiscount.final_cash_price"
+            placeholder="مثلاً: 1500000"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="final-installment-price">قیمت نهایی قسطی با تخفیف (تومان)</label>
+          <input
+            type="number"
+            id="final-installment-price"
+            v-model="currentDiscount.final_installment_price"
+            placeholder="مثلاً: 1800000"
           />
         </div>
 

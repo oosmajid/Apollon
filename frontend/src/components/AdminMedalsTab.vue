@@ -14,8 +14,8 @@ onMounted(async () => {
       api.getMedals(),
       api.getProfiles()
     ])
-    medals.value = medalsRes.data
-    students.value = studentsRes.data
+    medals.value = medalsRes.data?.results || medalsRes.data || []
+    students.value = studentsRes.data?.results || studentsRes.data || []
   } catch (error) {
     console.error("Failed to fetch data:", error)
   }
@@ -94,7 +94,7 @@ async function handleSubmit() {
     }
     // Refresh medals data
     const response = await api.getMedals()
-    medals.value = response.data
+    medals.value = response.data?.results || response.data || []
     showMedalModal.value = false
   } catch (error) {
     console.error('Failed to save medal:', error)
@@ -108,7 +108,7 @@ async function handleDelete() {
     console.log('Medal deleted successfully')
     // Refresh medals data
     const response = await api.getMedals()
-    medals.value = response.data
+    medals.value = response.data?.results || response.data || []
     showDeleteModal.value = false
     showMedalModal.value = false
   } catch (error) {

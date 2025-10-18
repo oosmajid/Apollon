@@ -29,13 +29,12 @@ const router = createRouter({
     {
       path: '/register',
       name: 'register',
-      component: RegistrationView,
-      meta: { requiresGuest: true }
+      component: RegistrationView
     },
     {
       path: '/course/photoshop', // می‌توانید این آدرس را به دلخواه تغییر دهید
       name: 'course-landing',
-      component: LandingView,
+      component: LandingView
     },
     {
       path: '/redirecting',
